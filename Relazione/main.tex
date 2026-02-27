@@ -5,7 +5,6 @@
 \usepackage{enumitem}
 \usepackage{caption}   % For customizing captions
 \usepackage[italian]{babel}
-\usepackage[utf8]{inputenc}
 \usepackage{booktabs}
 \usepackage{subcaption}
 \usepackage{multirow}
@@ -28,6 +27,7 @@
 \usepackage{listings}
 \usepackage{siunitx}
 \usepackage{xcolor}
+\usepackage{csquotes} % AGGIUNGI QUESTO per correggere il warning di babel
 \renewcommand{\listfigurename}{Elenco delle Figure}
 \renewcommand{\lstlistlistingname}{Elenco dei Codici}
 
@@ -50,7 +50,9 @@ backend=biber,
 style=numeric,
 sorting=nty
 ]{biblatex}
-\setstretch{1.2}
+
+% CORREZIONE: Usa \addbibresource invece di \bibliography per BibLaTeX
+\addbibresource{bibliografia.bib}
 
 
 \setmonofont{UbuntuMono-Regular.ttf}[Path=./, Scale=MatchLowercase]
@@ -62,9 +64,6 @@ sorting=nty
 \definecolor{backgroundColour}{rgb}{0.95,0.95,0.92}
 
 
-
-
-\bibliography{bibliografia.bib}
 
 
 
@@ -146,11 +145,14 @@ sorting=nty
 \input{intro.tex}
 
 \chapter{Panoramica del tema affrontato}
+\input{panoramica.tex}
 
 \chapter{Caso: ....}
+\input{casoStudio.tex}
 
 
 \chapter{Analisi...}
+\input{analisi.tex}
 
 \chapter{Conclusioni}
 \input{outro.tex}
@@ -158,5 +160,8 @@ sorting=nty
 \chapter*{Note sull'utilizzo dell'IA Generativa}
 \input{IANotes.tex}
 
+
+\addcontentsline{toc}{chapter}{Bibliografia}
+\printbibliography
 
 \end{document}
