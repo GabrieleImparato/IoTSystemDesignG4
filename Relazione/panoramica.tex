@@ -2,7 +2,7 @@ Prima di definire una possibile architettura IoT per il dominio agricolo, è nec
 
 L’analisi che segue mira dunque a individuare le principali sfide ingegneristiche che una futura architettura IoT per l’agricoltura di precisione dovrà affrontare, con particolare riferimento a connettività e latenza, vincoli energetici, topologia e ambiente operativo, nonché aspetti di sicurezza e protezione del dato.
 
-\subsection{Requisiti di Connettività e Latenza}
+\section{Requisiti di Connettività e Latenza}
 
 Nel dominio dell’agricoltura di precisione, i requisiti di connettività devono essere valutati alla luce della distribuzione geografica dei dispositivi e della natura dei dati raccolti. I nodi di sensing sono tipicamente installati su ampie superfici agricole, spesso in aree rurali caratterizzate da copertura di rete non uniforme e assenza di infrastrutture cablate. Ne deriva la necessità di soluzioni di comunicazione in grado di garantire ampia copertura, buona penetrazione del segnale e affidabilità nel tempo.
 
@@ -12,3 +12,32 @@ Per quanto riguarda la latenza, il dominio agricolo non impone requisiti di tipo
 
 Ne consegue che i principali vincoli progettuali in termini di connettività non riguardano la velocità di trasmissione o la latenza ultra-bassa, bensì la stabilità del collegamento, la scalabilità rispetto al numero di nodi distribuiti e la capacità di operare in condizioni ambientali variabili. La futura architettura dovrà quindi bilanciare ampiezza di copertura, consumo energetico e robustezza della comunicazione, coerentemente con le caratteristiche proprie del contesto agricolo.
 
+\section{Vincoli Energetici (Power Budget)}
+
+Nel dominio dell’agricoltura di precisione, il vincolo energetico rappresenta uno degli aspetti progettuali più rilevanti. I dispositivi di sensing sono distribuiti su ampie superfici e spesso installati in aree prive di accesso diretto alla rete elettrica. Di conseguenza, l’alimentazione a batteria costituisce la soluzione più comune, talvolta integrata con sistemi di energy harvesting, come piccoli pannelli solari, al fine di estendere l’autonomia operativa.
+
+La progettazione del sistema deve quindi partire da una stima accurata del \textit{power budget}, ossia del consumo energetico medio del dispositivo lungo un ciclo operativo completo. Tale consumo è determinato principalmente da tre componenti: il microcontrollore, i sensori e, soprattutto, il modulo radio. Quest’ultimo rappresenta in genere l’elemento più energivoro, in particolare durante le fasi di trasmissione.
+
+Per garantire autonomie dell’ordine di mesi o anni, risultano necessari specifici pattern energetici. In primo luogo, il dispositivo deve operare con un elevato \textit{duty-cycle} in modalità di sleep, attivandosi solo per brevi intervalli dedicati alla misura e alla trasmissione. In secondo luogo, può risultare opportuno adottare un modello \textit{event-driven}, in cui il nodo si attiva esclusivamente al superamento di determinate soglie. Un’ulteriore strategia consiste nella \textit{batch transmission}, ossia nell’accumulo locale dei dati con invio periodico aggregato, riducendo così il numero complessivo di attivazioni della radio.
+
+Il vincolo energetico incide anche sulle scelte architetturali complessive, poiché frequenti manutenzioni o sostituzioni di batterie su larga scala comporterebbero costi operativi elevati. Ne deriva che l’efficienza energetica non rappresenta un requisito accessorio, ma una condizione strutturale per la sostenibilità tecnica ed economica dell’intero sistema.
+
+\section{Topologia e Ambiente Operativo}
+
+Nel contesto dell’agricoltura di precisione, la topologia della rete e le condizioni ambientali rappresentano vincoli determinanti per la progettazione dell’architettura IoT. I dispositivi sono generalmente distribuiti su superfici estese, talvolta di diversi ettari, con una disposizione prevalentemente statica. I nodi di sensing risultano quindi fissi e geograficamente dispersi, mentre eventuali elementi mobili (ad esempio macchinari agricoli) costituiscono componenti complementari ma non dominanti dell’infrastruttura.
+
+Dal punto di vista topologico, il sistema tende ad assumere configurazioni semplici e scalabili, spesso basate su modelli a stella con uno o più gateway centrali incaricati della raccolta e dell’instradamento dei dati verso livelli superiori di elaborazione. La progettazione deve tuttavia tenere conto delle distanze tra i nodi, della possibile presenza di ostacoli naturali e della variabilità della copertura radio, elementi che possono influire sull’affidabilità complessiva della comunicazione.
+
+L’ambiente operativo agricolo è inoltre caratterizzato da condizioni potenzialmente ostili per l’hardware elettronico. I dispositivi sono esposti a pioggia, umidità, polvere, fango, radiazione solare diretta e significative escursioni termiche tra giorno e notte o tra stagioni. A ciò si aggiungono possibili sollecitazioni meccaniche dovute a lavorazioni del terreno, passaggio di mezzi agricoli o attività di manutenzione.
+
+Tali condizioni impongono requisiti stringenti in termini di robustezza meccanica, protezione dagli agenti atmosferici e affidabilità nel lungo periodo. Poiché l’accesso fisico ai nodi può risultare oneroso e poco frequente, il sistema deve essere progettato per operare in modo continuativo e stabile, minimizzando la necessità di interventi manutentivi. La topologia di rete e le caratteristiche ambientali non costituiscono quindi semplici aspetti logistici, ma influenzano in modo diretto le scelte progettuali e l’affidabilità complessiva dell’architettura.
+
+\section{Sicurezza e Privacy}
+
+Nel dominio dell’agricoltura di precisione, i requisiti di sicurezza e privacy devono essere valutati in funzione del valore economico dei dati e dell’impatto operativo che un’eventuale compromissione potrebbe generare. I dati raccolti dai dispositivi IoT riguardano tipicamente parametri ambientali, condizioni del suolo, informazioni sulla resa e pianificazioni operative. Pur non trattandosi di dati sanitari o altamente sensibili in senso personale, essi possono avere un rilevante valore strategico e competitivo per l’azienda agricola.
+
+Un accesso non autorizzato ai dati potrebbe consentire a terzi di ottenere informazioni sulle strategie produttive, sulle performance delle colture o sui cicli stagionali. Ancora più critico sarebbe il caso di manipolazione dei dati o compromissione degli attuatori: l’alterazione delle misure ambientali o dei comandi di irrigazione potrebbe causare spreco di risorse, danni alle colture o perdite economiche significative.
+
+Il contesto rurale introduce inoltre rischi specifici legati alla possibile esposizione fisica dei dispositivi. I nodi installati nei campi possono essere accessibili, aumentando la superficie di attacco in caso di manomissione diretta. Ciò rende necessario considerare meccanismi di autenticazione robusta dei dispositivi, protezione delle comunicazioni in transito e aggiornabilità sicura del firmware, al fine di ridurre la probabilità di compromissione nel lungo periodo.
+
+La sicurezza deve quindi essere integrata fin dalle prime fasi di progettazione, secondo un approccio coerente con il principio di \textit{security by design}. Sebbene il dominio agricolo non sia generalmente classificabile come safety-critical, l’impatto economico e operativo di un attacco informatico rende imprescindibile l’adozione di misure proporzionate al rischio, bilanciando protezione, costi e complessità implementativa.
