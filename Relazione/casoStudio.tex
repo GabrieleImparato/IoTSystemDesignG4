@@ -4,3 +4,89 @@
 		o Descrizione di come il caso di studio analizzato ha affrontato (a livello 
 		logico/concettuale) i requisiti definiti al capitolo precedente. }
 \end{center}
+
+\section{Introduzione al Caso di Studio}
+
+Per illustrare concretamente come un sistema IoT possa rispondere ai requisiti e ai vincoli progettuali individuati nei capitoli precedenti, si è scelto di analizzare il progetto \textbf{SWAMP} (\textit{Smart Water Management Platform}), una piattaforma IoT per la gestione intelligente dell'irrigazione in agricoltura di precisione, sviluppata nell'ambito di una collaborazione internazionale tra Unione Europea e Brasile, finanziata dal programma Horizon 2020 \cite{kamienski2019swamp}.
+
+L'obiettivo principale della piattaforma SWAMP è la riduzione dello spreco idrico nella produzione agricola attraverso l'automazione e l'ottimizzazione dei processi irrigui, basandosi su dati raccolti in tempo reale da reti di sensori distribuiti sul campo. Il progetto è stato validato mediante siti pilota situati sia in contesti climatici mediterranei (Italia e Spagna) sia tropicali (Brasile), rendendolo un caso di studio particolarmente rappresentativo delle sfide operative tipiche del dominio agricolo.
+
+La scelta di questo caso è motivata dalla completezza dell'architettura proposta: SWAMP copre l'intero ciclo, dalla raccolta dei dati ambientali tramite sensori, alla trasmissione a basso consumo energetico, fino all'elaborazione in cloud e alla generazione di raccomandazioni irrigue automatizzate. Tale ampiezza consente di valutare il sistema alla luce di ciascuno dei requisiti ingegneristici precedentemente definiti.
+
+
+\section{Architettura del Sistema}
+
+La piattaforma SWAMP adotta un'architettura a più livelli, coerente con il paradigma IoT tipico delle applicazioni agricole. L'organizzazione del sistema può essere schematizzata nei seguenti strati funzionali:
+
+\begin{itemize}
+	\item \textbf{Livello di percezione (Sensing Layer)}: comprende i nodi sensore distribuiti nei campi agricoli, incaricati della misurazione delle variabili ambientali e agronomiche. I sensori impiegati includono sonde per l'umidità del suolo a diverse profondità, stazioni meteorologiche (temperatura, umidità relativa, velocità del vento, radiazione solare, precipitazioni) e misuratori di portata per i flussi irrigui. I nodi sono progettati per operare in modalità a basso consumo energetico, con alimentazione a batteria eventualmente integrata da pannelli solari.
+	
+	\item \textbf{Livello di comunicazione (Network Layer)}: la trasmissione dei dati dai nodi sensore ai gateway avviene tramite protocollo \textbf{LoRaWAN}, scelto per la sua capacità di garantire comunicazioni a lungo raggio (nell'ordine di chilometri) con consumi energetici estremamente ridotti. Questa scelta risulta determinante nel contesto agricolo, dove i dispositivi sono distribuiti su ampie superfici, spesso in aree rurali prive di infrastrutture di rete tradizionali.
+	
+	\item \textbf{Livello di elaborazione intermedia (Fog/Edge Layer)}: i dati raccolti vengono pre-elaborati a livello locale da nodi fog, che svolgono funzioni di aggregazione, filtraggio e controllo locale dell'irrigazione. Tale livello consente di ridurre il volume di dati trasmessi verso il cloud e di garantire una risposta locale anche in caso di temporanea indisponibilità della connessione a Internet.
+	
+	\item \textbf{Livello cloud e applicativo (Cloud/Application Layer)}: l'elaborazione avanzata dei dati, l'analisi storica e i modelli decisionali per la pianificazione irrigua risiedono nel cloud. La piattaforma si basa su componenti open-source derivati dal framework \textbf{FIWARE}, che fornisce strumenti standardizzati per la gestione di contesti IoT, inclusi broker di messaggi, gestione dei dati contestuali e interfacce API RESTful per l'integrazione con sistemi esterni.
+\end{itemize}
+
+
+\section{Risposta ai Requisiti di Connettività e Latenza}
+
+La piattaforma SWAMP affronta il problema della connettività in ambienti rurali attraverso l'adozione del protocollo LoRaWAN, una tecnologia LPWAN (\textit{Low Power Wide Area Network}) progettata specificamente per scenari in cui è necessaria un'ampia copertura geografica con volumi di dati contenuti.
+
+I nodi sensore trasmettono pacchetti di dimensioni ridotte, contenenti misurazioni ambientali campionate a intervalli regolari (tipicamente ogni 10--30 minuti). Tale frequenza è coerente con la dinamica dei processi agronomici monitorati, che non richiedono aggiornamenti in tempo reale stretto. Il sistema opera pertanto con un modello di comunicazione \textbf{asincrono}, dove i dati vengono raccolti periodicamente e inoltrati ai gateway senza vincoli di latenza deterministica.
+
+La copertura radio dei gateway LoRaWAN consente di servire nodi distribuiti su diversi ettari con un numero limitato di punti di accesso, riducendo la complessità infrastrutturale. Nei siti pilota, un singolo gateway è stato in grado di coprire l'intera area sperimentale, confermando l'adeguatezza della tecnologia per il contesto agricolo.
+
+Da un punto di vista dei volumi di dati, il traffico generato è classificabile come \textit{low-throughput}: i pacchetti trasmessi contengono poche decine di byte per ciascuna lettura sensoriale. Questa caratteristica è perfettamente compatibile con i limiti di banda di LoRaWAN e con le normative sul \textit{duty cycle} vigenti nelle bande ISM europee.
+
+
+\section{Gestione dei Vincoli Energetici}
+
+Il vincolo energetico è affrontato nella piattaforma SWAMP a più livelli, riflettendo la necessità di garantire autonomie operative prolungate per i nodi sensore installati nei campi.
+
+I nodi di sensing operano con alimentazione a \textbf{batteria}, integrata in alcuni casi da piccoli pannelli fotovoltaici per l'\textit{energy harvesting}. Il profilo energetico del sistema è ottimizzato mediante l'adozione di un rigoroso \textbf{duty cycle}: i nodi trascorrono la maggior parte del tempo in modalità di \textit{deep sleep}, attivandosi periodicamente solo per effettuare la misurazione e la trasmissione dei dati.
+
+L'impiego del protocollo LoRaWAN contribuisce significativamente all'efficienza energetica complessiva. Le classi di dispositivo LoRaWAN (in particolare la \textbf{Classe A}, utilizzata nei nodi sensore) prevedono che il modulo radio sia attivo esclusivamente durante le brevi finestre di trasmissione e ricezione, mentre rimane spento per il resto del ciclo operativo. Ciò consente di mantenere un consumo medio nell'ordine di pochi milliampere-ora per giorno, garantendo autonomie operative di diversi mesi con una singola batteria.
+
+La strategia adottata può essere assimilata a un modello di \textbf{batch transmission}: i dati vengono acquisiti e temporaneamente memorizzati in locale, per poi essere trasmessi in modo aggregato a intervalli definiti, riducendo il numero complessivo di attivazioni della radio e, di conseguenza, il consumo energetico.
+
+
+\section{Topologia e Ambiente Operativo}
+
+Dal punto di vista topologico, la piattaforma SWAMP adotta una configurazione a \textbf{stella} (o stella di stelle), tipica delle reti LoRaWAN. I nodi sensore comunicano direttamente con uno o più gateway centrali, i quali a loro volta inoltrano i dati verso i livelli fog e cloud tramite connessioni IP (Ethernet, Wi-Fi o rete cellulare).
+
+I nodi sono \textbf{statici}, installati in posizioni fisse all'interno del campo, scelte in base alla variabilità spaziale del suolo e alle esigenze specifiche di monitoraggio. I gateway, anch'essi fissi, sono posizionati in punti elevati o strategici per massimizzare la copertura radio.
+
+L'ambiente operativo dei siti pilota presenta le condizioni tipiche degli scenari agricoli: esposizione prolungata ad agenti atmosferici (pioggia, umidità, polvere, radiazione solare), significative escursioni termiche stagionali e possibili interferenze dovute alla vegetazione. Per far fronte a tali condizioni, i dispositivi sono alloggiati in involucri con grado di protezione adeguato (tipicamente \textbf{IP65} o superiore), che garantiscono la resistenza all'infiltrazione di acqua e polvere.
+
+La validazione su più siti pilota, in contesti climatici differenti (mediterraneo e tropicale), ha permesso di verificare la robustezza della soluzione in condizioni ambientali reali e variabili, confermando la praticabilità dell'approccio nelle diverse realtà agricole.
+
+
+\section{Sicurezza e Protezione dei Dati}
+
+Sul piano della sicurezza, la piattaforma SWAMP beneficia dei meccanismi intrinseci del protocollo LoRaWAN, che prevede \textbf{crittografia end-to-end} a livello di rete e di applicazione. Ogni nodo è associato a chiavi crittografiche univoche (\textit{Network Session Key} e \textit{Application Session Key}), che proteggono sia l'integrità sia la riservatezza dei dati trasmessi via radio.
+
+A livello di piattaforma cloud, l'architettura basata su FIWARE impiega protocolli sicuri (HTTPS, TLS) per le comunicazioni tra i componenti e l'accesso alle API. La gestione delle identità e delle autorizzazioni consente di controllare l'accesso ai dati e alle funzionalità del sistema in base al ruolo degli utenti.
+
+I dati raccolti, pur non essendo classificabili come dati personali sensibili, hanno un valore economico e strategico per l'azienda agricola: informazioni sulla resa, sulle condizioni del suolo e sulle strategie irrigue possono rappresentare un vantaggio competitivo. La piattaforma adotta pertanto un approccio coerente con il principio di \textit{security by design}, integrando le misure di protezione fin dalla fase progettuale anziché come interventi correttivi successivi.
+
+Una criticità residua, comune a tutti i sistemi IoT agricoli, riguarda la sicurezza fisica dei dispositivi installati nei campi, potenzialmente accessibili e soggetti a manomissione. In questo ambito, la piattaforma si affida alla robustezza meccanica degli involucri e alla capacità del sistema di rilevare anomalie nei dati trasmessi, segnalando potenziali compromissioni dei nodi.
+
+
+\section{Valutazione Critica del Caso di Studio}
+
+Il progetto SWAMP rappresenta un esempio significativo di come un'architettura IoT completa possa essere progettata e validata per rispondere alle reali esigenze dell'agricoltura di precisione. I risultati ottenuti nei siti pilota hanno confermato la fattibilità tecnica della soluzione, evidenziando una riduzione misurabile del consumo idrico rispetto alle pratiche irrigue tradizionali.
+
+Tuttavia, è opportuno evidenziare alcuni aspetti critici emersi dall'analisi:
+
+\begin{itemize}
+	\item \textbf{Scalabilità}: la validazione su siti pilota di dimensioni contenute non garantisce automaticamente la replicabilità su larga scala. L'incremento del numero di nodi e dell'estensione geografica potrebbe introdurre problematiche di gestione della rete, di capacità dei gateway e di manutenzione distribuita.
+	
+	\item \textbf{Dipendenza dalla connettività cloud}: sebbene il livello fog garantisca una certa autonomia locale, le funzionalità più avanzate (analisi predittiva, modelli di ottimizzazione) dipendono dalla disponibilità della connessione Internet, che in contesti rurali può risultare intermittente o instabile.
+	
+	\item \textbf{Manutenzione a lungo termine}: l'autonomia energetica dei nodi, pur ottimizzata, impone comunque interventi periodici di sostituzione delle batterie o di verifica dello stato dei dispositivi, con costi operativi proporzionali alla dimensione dell'installazione.
+	
+	\item \textbf{Interoperabilità}: l'adozione del framework FIWARE favorisce la standardizzazione, ma l'integrazione con sistemi proprietari preesistenti nelle aziende agricole può richiedere adattamenti specifici.
+\end{itemize}
+
+\noindent Nel complesso, il caso SWAMP dimostra che i requisiti individuati nell'analisi teorica trovano riscontro concreto nelle scelte progettuali di un sistema reale. Le soluzioni adottate per connettività, efficienza energetica, topologia e sicurezza risultano coerenti con i vincoli tipici del dominio agricolo, confermando la validità del modello concettuale dell'agricoltura di precisione descritto nei capitoli precedenti.
