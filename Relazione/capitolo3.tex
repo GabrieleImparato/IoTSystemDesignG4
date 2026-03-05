@@ -16,16 +16,21 @@ La scelta di questo caso è motivata dalla completezza dell'architettura propost
 
 \section{Architettura del Sistema}
 
-La piattaforma SWAMP adotta un'architettura a più livelli, coerente con il paradigma IoT tipico delle applicazioni agricole. L'organizzazione del sistema può essere schematizzata nei seguenti strati funzionali:
+La piattaforma SWAMP adotta un’architettura a più livelli, coerente con il paradigma IoT tipico delle applicazioni agricole. Sebbene l'organizzazione del sistema sia concettualmente riconducibile ai classici strati funzionali dell'IoT (percezione, rete, elaborazione intermedia e cloud), il progetto struttura formalmente l'architettura su cinque livelli specifici:
 
 \begin{itemize}
-	\item \textbf{Livello di percezione (Sensing Layer)}: comprende i nodi sensore distribuiti nei campi agricoli, incaricati della misurazione delle variabili ambientali e agronomiche. I sensori impiegati includono sonde per l'umidità del suolo a diverse profondità, stazioni meteorologiche (temperatura, umidità relativa, velocità del vento, radiazione solare, precipitazioni) e misuratori di portata per i flussi irrigui. I nodi sono progettati per operare in modalità a basso consumo energetico, con alimentazione a batteria eventualmente integrata da pannelli solari.
+	\item \textbf{Layer 1: Device \& Communication (Dispositivi e Comunicazione)}: Questo livello astrae una varietà di tecnologie di sensori e attuatori impiegati per acquisire parametri relativi al suolo (es. umidità), alle colture (es. stadio di crescita) e alle condizioni meteorologiche (es. temperatura dell'aria). Include l'utilizzo di sonde multiparametriche, droni per l'acquisizione di immagini e l'impiego di tecnologie di comunicazione LPWAN come LoRaWAN.
 	
-	\item \textbf{Livello di comunicazione (Network Layer)}: la trasmissione dei dati dai nodi sensore ai gateway avviene tramite protocollo \textbf{LoRaWAN}, scelto per la sua capacità di garantire comunicazioni a lungo raggio (nell'ordine di chilometri) con consumi energetici estremamente ridotti. Questa scelta risulta determinante nel contesto agricolo, dove i dispositivi sono distribuiti su ampie superfici, spesso in aree rurali prive di infrastrutture di rete tradizionali.
+
+	\item \textbf{Layer 2: Data Acquisition, Security \& Management (Acquisizione Dati, Sicurezza e Gestione)}: Caratterizzato da protocolli e componenti software per l'acquisizione dei dati, come MQTT e LoRa Server. Questo livello include funzioni di sicurezza, gestione dei dispositivi e il componente FIWARE IoT Agent, che si occupa di tradurre la rappresentazione interna dei dati da e verso i dispositivi sul campo.
 	
-	\item \textbf{Livello di elaborazione intermedia (Fog/Edge Layer)}: i dati raccolti vengono pre-elaborati a livello locale da nodi fog, che svolgono funzioni di aggregazione, filtraggio e controllo locale dell'irrigazione. Tale livello consente di ridurre il volume di dati trasmessi verso il cloud e di garantire una risposta locale anche in caso di temporanea indisponibilità della connessione a Internet.
+	\item \textbf{Layer 3: Data Management (Gestione dei Dati)}: Contiene i componenti software incaricati dell'archiviazione, elaborazione e distribuzione dei dati, basati sugli "Enablers" di FIWARE (come Orion, Quantum Leap, Cygnus e Cosmos) e sul motore semantico SEPA SPARQL. Questo strato si appoggia su un'infrastruttura distribuita composta da server cloud e nodi fog che lavorano in sinergia per gestire enormi quantità di dati.
 	
-	\item \textbf{Livello cloud e applicativo (Cloud/Application Layer)}: l'elaborazione avanzata dei dati, l'analisi storica e i modelli decisionali per la pianificazione irrigua risiedono nel cloud. La piattaforma si basa su componenti open-source derivati dal framework \textbf{FIWARE}, che fornisce strumenti standardizzati per la gestione di contesti IoT, inclusi broker di messaggi, gestione dei dati contestuali e interfacce API RESTful per l'integrazione con sistemi esterni.
+	\item \textbf{Layer 4: Water Irrigation \& Distribution Models (Modelli di Irrigazione e Distribuzione Idrica)}: A questo livello risiedono i modelli agricoli tradizionali per la stima del fabbisogno idrico, basati sia sull'analisi del suolo sia sull'acquisizione di immagini tramite droni. Include inoltre modelli di ottimizzazione per la distribuzione dell'acqua e l'impiego di tecniche di intelligenza computazionale, come il machine learning.
+	
+	\item \textbf{Layer 5: Water Application Services (Servizi Applicativi per l'Acqua)}: Costituisce il livello più alto e fornisce i servizi finali che traducono l'elaborazione dei dati in azioni concrete, rendendole accessibili agli agricoltori e ai distributori d'acqua tramite apposite interfacce utente.
+	
+	
 \end{itemize}
 
 
@@ -37,7 +42,7 @@ I nodi sensore trasmettono pacchetti di dimensioni ridotte, contenenti misurazio
 
 La copertura radio dei gateway LoRaWAN consente di servire nodi distribuiti su diversi ettari con un numero limitato di punti di accesso, riducendo la complessità infrastrutturale. Nei siti pilota, un singolo gateway è stato in grado di coprire l'intera area sperimentale, confermando l'adeguatezza della tecnologia per il contesto agricolo.
 
-Da un punto di vista dei volumi di dati, il traffico generato è classificabile come \textit{low-throughput}: i pacchetti trasmessi contengono poche decine di byte per ciascuna lettura sensoriale. Questa caratteristica è perfettamente compatibile con i limiti di banda di LoRaWAN e con le normative sul \textit{duty cycle} vigenti nelle bande ISM europee.
+Da un punto di vista dei volumi di dati, il traffico generato è classificabile come \textit{low-throughput}: i pacchetti trasmessi contengono poche decine di byte per ciascuna lettura sensoriale. Questa caratteristica è perfettamente compatibile con i limiti di banda di LoRaWAN e con le normative sul \textit{duty cycle} vigenti nelle bande ISM europee \cite{etsi300220}.
 
 
 \section{Gestione dei Vincoli Energetici}
