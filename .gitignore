@@ -20,6 +20,9 @@
 *.tgz
 *.zip
 
+# busy file
+*.synctex(busy)
+
 # PDF (uncomment if you don't want to track PDFs)
 *.pdf
 
