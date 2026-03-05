@@ -41,7 +41,7 @@
 \pagestyle{fancy}
 \fancyhf{} % Clear all header and footer fields
 \fancyhead[L]{\nouppercase{\leftmark}} % Left section name in header
-\fancyhead[R]{G4} % Left section name in header
+%\fancyhead[R]{G4} % Left section name in header
 \fancyfoot[C]{\thepage} % Centered page number in footer
 
 \usepackage[
@@ -145,26 +145,15 @@ sorting=nty
 \chapter{Panoramica del tema affrontato}
 \input{capitolo2.tex}
 
-
 \chapter{Caso di Studio: Smart Water Management Platform (SWAMP)}
 \input{capitolo3.tex}
 
-
 \chapter{Analisi e considerazioni per la progettazione}
-\input{analisi.tex}
+\input{capitolo4.tex}
 
-\chapter{Conclusioni}
-\input{outro.tex}
+\chapter*{Note sull’utilizzo dell’IA Generativa}
+\input{capitolo5.tex}
 
-
-\chapter{Note sull’utilizzo dell’IA Generativa}
-\input{bibliografia.tex}
-
-
-\chapter*{Note sull'utilizzo dell'IA Generativa}
-\input{IANotes.tex}
-
-
-\addcontentsline{toc}{chapter}{Bibliografia}
+\addcontentsline{toc}{chapter}{Bibliografia e Sitografia}
 \printbibliography
 \end{document}

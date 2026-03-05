@@ -1,0 +1,110 @@
+
+\section{Premessa}
+
+Dall'analisi dei requisiti e dallo studio del caso SWAMP emergono criticità strutturali comuni a qualsiasi sistema IoT per l'agricoltura di precisione. Il presente capitolo le sintetizza in termini di compromessi progettuali (\textit{trade-off}) e colli di bottiglia (\textit{bottleneck}), individuando i nodi decisionali che la successiva fase di design dell'architettura dovrà risolvere.
+
+L'obiettivo non è proporre soluzioni definitive, bensì rendere esplicite le interdipendenze tra i diversi requisiti e le conseguenze di ogni compromesso, così da guidare in modo consapevole le scelte progettuali.
+
+
+\section{Trade-off Energia vs. Banda e Frequenza di Campionamento}
+
+Il compromesso tra consumo energetico e capacità di comunicazione è il vincolo più pervasivo nel dominio agricolo. I nodi di sensing operano a batteria con autonomie attese di mesi o anni, mentre la qualità delle decisioni irrigue dipende dalla granularità temporale dei dati. Le criticità da risolvere sono le seguenti:
+
+\begin{itemize}
+	\item \textbf{Dimensionamento del duty cycle}: l'intervallo di campionamento e trasmissione determina direttamente il consumo medio del nodo. Intervalli nell'ordine di 10~minuti, come adottato nel caso SWAMP~\cite{kamienski2019swamp}, risultano accettabili per le dinamiche agronomiche, ma impediscono la rilevazione di fenomeni transitori rapidi (precipitazioni intense, guasti agli attuatori). La progettazione dovrà valutare profili adattivi (\textit{event-driven sampling}) che modulino la frequenza in funzione delle condizioni rilevate.
+	
+	\item \textbf{Limiti regolamentari sulle bande ISM}: le normative europee~\cite{etsi300220} impongono un duty cycle massimo dell'1\,\% nella sotto-banda a 868\,MHz, vincolando il numero massimo di trasmissioni giornaliere per nodo. In presenza di centinaia di dispositivi, il rischio di collisioni cresce, degradando l'affidabilità della rete.
+	
+	\item \textbf{Aggregazione locale dei dati}: una strategia di \textit{batch transmission} riduce le attivazioni radio ma introduce latenza aggiuntiva. La progettazione dovrà bilanciare la dimensione del buffer locale con la tempestività richiesta dalle applicazioni a valle.
+\end{itemize}
+
+
+\section{Collo di Bottiglia: Scalabilità della Piattaforma Software}
+
+Quando il numero di nodi cresce, il collo di bottiglia di un sistema IoT agricolo si sposta dalla rete di campo alla piattaforma software. I test condotti nel caso SWAMP~\cite{kamienski2019swamp} lo confermano: il database e i moduli di ingestione dati saturano le risorse ben prima che la rete radio raggiunga i propri limiti. In particolare:
+
+\begin{itemize}
+	\item \textbf{Saturazione del database}: con l'aumento dei nodi, il database diventa il componente più lento della catena. Nel caso SWAMP, oltre i 10.000--15.000~sensori simultanei il sistema diventa instabile.
+	
+	\item \textbf{Accumulo di messaggi in ingresso}: i moduli che ricevono i dati dal campo possono accumulare richieste in coda quando il database rallenta, consumando memoria fino al crash.
+	
+	\item \textbf{Effetto a cascata}: se un componente rallenta e non esiste un meccanismo per limitare il flusso di dati in ingresso, le richieste si accumulano a catena su tutti gli altri componenti, fino a bloccare l'intera piattaforma.
+\end{itemize}
+
+
+
+
+\section{Trade-off Cloud vs. Fog}
+
+La distribuzione delle funzionalità tra livello cloud e livello fog rappresenta un compromesso strutturale tra autonomia locale e capacità computazionale. Il caso SWAMP ha mostrato come scenari pilota diversi richiedano configurazioni radicalmente differenti, confermando l'assenza di una soluzione universale. Le criticità che ne derivano sono:
+
+\begin{itemize}
+	\item \textbf{Dipendenza dalla connettività}: un'architettura cloud-centrica semplifica l'infrastruttura locale ma rende il sistema inoperante in caso di disconnessione, eventualità frequente in contesti rurali. Viceversa, un approccio fog-pesante garantisce continuità operativa a fronte di maggiore complessità di deployment e manutenzione.
+	
+	\item \textbf{Distribuzione dell'intelligenza}: le elaborazioni complesse (modelli predittivi, machine learning) richiedono risorse computazionali disponibili tipicamente solo in cloud, mentre le decisioni operative urgenti (es.\ chiusura di una valvola) necessitano di tempi di risposta garantiti localmente.
+	
+	\item \textbf{Sincronizzazione dei dati}: in un'architettura ibrida, la gestione delle fasi di disconnessione e riconnessione impone meccanismi robusti di riconciliazione, per evitare perdite o duplicazioni di informazioni.
+\end{itemize}
+
+La progettazione dovrà definire esplicitamente quali funzionalità garantire localmente e quali delegare al cloud, stabilendo le politiche di sincronizzazione e di fallback.
+
+
+\section{Sicurezza vs. Risorse}
+
+Pur non essendo un dominio \textit{safety-critical}, il valore economico e strategico dei dati agricoli (rese, strategie irrigue, pianificazioni operative) richiede misure di protezione adeguate. Le criticità specifiche riguardano:
+
+\begin{itemize}
+	\item \textbf{Vincolo energia--sicurezza}: i meccanismi crittografici impongono un costo computazionale ed energetico aggiuntivo sui nodi a batteria. Protocolli come LoRaWAN integrano cifratura AES-128 a livello di stack, ma qualsiasi funzionalità supplementare (es.\ aggiornamento sicuro del firmware OTA) impatta sull'autonomia del dispositivo.
+	
+	\item \textbf{Sicurezza fisica}: i nodi installati nei campi sono esposti a manomissione diretta. L'architettura dovrà prevedere meccanismi di \textit{anomaly detection} a livello di piattaforma per identificare dispositivi compromessi.
+	
+	\item \textbf{Gestione delle chiavi crittografiche}: in un sistema con centinaia di nodi distribuiti, la distribuzione, la rotazione e la revoca delle chiavi rappresentano un problema logistico amplificato dalla difficoltà di accesso fisico ai dispositivi.
+\end{itemize}
+
+
+\section{Manutenibilità e Sostenibilità Operativa}
+
+La manutenibilità dell'infrastruttura distribuita è determinante per la sostenibilità a lungo termine del sistema. Nel contesto agricolo, tale criticità è amplificata dalle distanze, dalla difficoltà di accesso ai nodi e dalla stagionalità delle attività.
+
+\begin{itemize}
+	\item \textbf{Sostituzione delle batterie}: anche con autonomie di 6--12~mesi, un parco di centinaia di nodi comporta interventi di manutenzione frequenti, con costi operativi significativi.
+	
+	\item \textbf{Aggiornamento del firmware}: la correzione di vulnerabilità e l'evoluzione degli algoritmi richiedono meccanismi OTA (\textit{Over The Air}), che a loro volta impongono requisiti aggiuntivi di memoria, energia e sicurezza.
+	
+	\item \textbf{Monitoraggio proattivo}: l'architettura dovrà integrare funzionalità di \textit{device management} per rilevare guasti, degrado delle batterie, deriva dei sensori o perdita di connettività, riducendo i tempi di intervento.
+\end{itemize}
+
+
+\section*{Sintesi dei Punti Critici}
+
+La Tabella~\ref{tab:punti_critici} riassume i principali punti critici individuati, classificandoli per livello architetturale.
+
+\begin{table}[H]
+	\centering
+	\small
+	\begin{tabularx}{\textwidth}{|l|X|l|}
+		\hline
+		\textbf{Punto Critico} & \textbf{Descrizione} & \textbf{Livello} \\
+		\hline
+		Energia vs. campionamento & Compromesso tra autonomia dei nodi e risoluzione temporale dei dati & Dispositivo \\
+		\hline
+		Limiti duty cycle ISM & Vincoli regolamentari sul tempo di trasmissione (1\,\% a 868\,MHz) & Rete \\
+		\hline
+		Scalabilità software & Collo di bottiglia su database e ingestione dati oltre $\sim$10k sensori & Cloud \\
+		\hline
+		Cloud vs. fog & Compromesso tra autonomia locale e capacità computazionale & Infrastruttura \\
+		\hline
+		Sicurezza vs. energia & Costo energetico della crittografia sui nodi a batteria & Dispositivo \\
+		\hline
+		Sicurezza fisica & Esposizione dei nodi a manomissione nei campi & Dispositivo \\
+		\hline
+		Manutenibilità & Costi operativi di batterie, firmware OTA, monitoraggio & Sistema \\
+		\hline
+	\end{tabularx}
+	\caption{Sintesi dei punti critici per la progettazione dell'architettura.}
+	\label{tab:punti_critici}
+\end{table}
+
+\noindent Questi punti critici non sono risolvibili in modo isolato: le scelte relative a un vincolo influenzano direttamente gli altri. L'aumento della frequenza di campionamento impatta sia sul consumo energetico sia sulle prestazioni della piattaforma software; l'introduzione di elaborazioni fog migliora l'autonomia ma incrementa la complessità di manutenzione; il rafforzamento della sicurezza erode il budget energetico dei nodi.
+
+La successiva fase di design dell'architettura dovrà pertanto adottare un approccio olistico, valutando le interdipendenze tra i vincoli e definendo compromessi espliciti e motivati per ciascun punto critico.

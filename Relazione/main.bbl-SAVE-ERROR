@@ -1,0 +1,98 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nty/global//global/global/global}
+    \entry{kamienski2019swamp}{article}{}{}
+      \name{author}{8}{}{%
+        {{hash=75851c7c25c319403409d50c72274cfb}{%
+           family={Kamienski},
+           familyi={K\bibinitperiod},
+           given={Carlos},
+           giveni={C\bibinitperiod}}}%
+        {{hash=9b978ea64eb74dc7a0dbd6e99cfac836}{%
+           family={Soininen},
+           familyi={S\bibinitperiod},
+           given={Juha-Pekka},
+           giveni={J\bibinithyphendelim P\bibinitperiod}}}%
+        {{hash=934f10319855cc4b1ec474f08fef6f03}{%
+           family={Taumberger},
+           familyi={T\bibinitperiod},
+           given={Markus},
+           giveni={M\bibinitperiod}}}%
+        {{hash=4b880aaddf7abf89e97c7807d4bf6d91}{%
+           family={Dantas},
+           familyi={D\bibinitperiod},
+           given={Ronaldo},
+           giveni={R\bibinitperiod}}}%
+        {{hash=19d6e70b2b66d1adb066426cfac59a5b}{%
+           family={Toscano},
+           familyi={T\bibinitperiod},
+           given={Attilio},
+           giveni={A\bibinitperiod}}}%
+        {{hash=654695b0721dbceb39140e2ba75b435b}{%
+           family={Cinotti},
+           familyi={C\bibinitperiod},
+           given={Tullio\bibnamedelima Salmon},
+           giveni={T\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+        {{hash=355972a954a0b866e9e79085e98420c8}{%
+           family={Maia},
+           familyi={M\bibinitperiod},
+           given={Rodrigo\bibnamedelima Filev},
+           giveni={R\bibinitperiod\bibinitdelim F\bibinitperiod}}}%
+        {{hash=ce7e120a86589974403fc550437731cb}{%
+           family={Neto},
+           familyi={N\bibinitperiod},
+           given={Augusto\bibnamedelima Teixeira},
+           giveni={A\bibinitperiod\bibinitdelim T\bibinitperiod}}}%
+      }
+      \strng{namehash}{ac23b2b95e2f825204c05253d30bc5a6}
+      \strng{fullhash}{bf6593ecfbab07e5df0fbe6acbc09819}
+      \strng{fullhashraw}{bf6593ecfbab07e5df0fbe6acbc09819}
+      \strng{bibnamehash}{ac23b2b95e2f825204c05253d30bc5a6}
+      \strng{authorbibnamehash}{ac23b2b95e2f825204c05253d30bc5a6}
+      \strng{authornamehash}{ac23b2b95e2f825204c05253d30bc5a6}
+      \strng{authorfullhash}{bf6593ecfbab07e5df0fbe6acbc09819}
+      \strng{authorfullhashraw}{bf6593ecfbab07e5df0fbe6acbc09819}
+      \field{sortinit}{K}
+      \field{sortinithash}{c02bf6bff1c488450c352b40f5d853ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Sensors}
+      \field{month}{1}
+      \field{number}{2}
+      \field{title}{Smart Water Management Platform: {IoT}-Based Precision Irrigation for Agriculture}
+      \field{volume}{19}
+      \field{year}{2019}
+      \field{pages}{276}
+      \range{pages}{1}
+      \verb{doi}
+      \verb 10.3390/s19020276
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.3390/s19020276
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.3390/s19020276
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+
