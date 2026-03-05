@@ -38,11 +38,10 @@ La piattaforma SWAMP adotta un’architettura a più livelli, coerente con il pa
 
 La piattaforma SWAMP affronta il problema della connettività in ambienti rurali attraverso l'adozione del protocollo LoRaWAN, una tecnologia LPWAN (\textit{Low Power Wide Area Network}) progettata specificamente per scenari in cui è necessaria un'ampia copertura geografica con volumi di dati contenuti.
 
-I nodi sensore trasmettono pacchetti di dimensioni ridotte, contenenti misurazioni ambientali campionate a intervalli regolari (tipicamente ogni 10--30 minuti). Tale frequenza è coerente con la dinamica dei processi agronomici monitorati, che non richiedono aggiornamenti in tempo reale stretto. Il sistema opera pertanto con un modello di comunicazione \textbf{asincrono}, dove i dati vengono raccolti periodicamente e inoltrati ai gateway senza vincoli di latenza deterministica.
+I nodi sensore trasmettono pacchetti di dimensioni ridotte, contenenti misurazioni ambientali campionate a intervalli regolari (tipicamente ogni 10 minuti). Tale frequenza è coerente con la dinamica dei processi agronomici monitorati, che non richiedono aggiornamenti in tempo reale stretto. Il sistema opera pertanto con un modello di comunicazione \textbf{asincrono}, dove i dati vengono raccolti periodicamente e inoltrati ai gateway senza vincoli di latenza deterministica.
 
 La copertura radio dei gateway LoRaWAN consente di servire nodi distribuiti su diversi ettari con un numero limitato di punti di accesso, riducendo la complessità infrastrutturale. Nei siti pilota, un singolo gateway è stato in grado di coprire l'intera area sperimentale, confermando l'adeguatezza della tecnologia per il contesto agricolo.
 
-Da un punto di vista dei volumi di dati, il traffico generato è classificabile come \textit{low-throughput}: i pacchetti trasmessi contengono poche decine di byte per ciascuna lettura sensoriale. Questa caratteristica è perfettamente compatibile con i limiti di banda di LoRaWAN e con le normative sul \textit{duty cycle} vigenti nelle bande ISM europee \cite{etsi300220}.
 
 
 \section{Gestione dei Vincoli Energetici}

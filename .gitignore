@@ -27,7 +27,6 @@
 *.bib.bak
 
 # IDE and editor files
-.vscode/
 .idea/
 *.swp
 *.swo
