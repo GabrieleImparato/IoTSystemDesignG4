@@ -184,7 +184,7 @@ La Tabella~\ref{tab:architettura_livelli} riassume i tre livelli, i componenti p
 \end{table}
 
 
-\section{Stime Ingegneristiche}
+\section{Stime}
 
 Le stime che seguono traducono i requisiti e le scelte architetturali in valori quantitativi, fornendo un dimensionamento di massima del sistema.
 
@@ -216,7 +216,7 @@ Il numero di nodi è determinato dalla necessità di catturare la variabilità m
 
 \subsection{Copertura Radio e Link Budget}
 
-Per verificare che il segnale LoRa raggiunga il gateway da ogni punto del vigneto, si calcola il \textit{link budget}, ovvero il bilancio tra la potenza emessa dal trasmettitore e la sensibilità minima del ricevitore. In termini intuitivi, il link budget indica ``quanti dB di attenuazione'' il collegamento radio può tollerare prima di perdere il segnale\footnote{Il decibel (dB) è un'unità logaritmica usata per esprimere rapporti di potenza. Ogni 10~dB in più corrispondono a una potenza 10 volte maggiore; ogni 3~dB in più corrispondono circa al doppio della potenza.}.
+Per verificare che il segnale LoRa raggiunga il gateway da ogni punto del vigneto, si calcola il \textit{link budget}, ovvero il bilancio tra la potenza emessa dal trasmettitore e la sensibilità minima del ricevitore. Il link budget indica ``quanti dB di attenuazione'' il collegamento radio può tollerare prima di perdere il segnale\footnote{Il decibel (dB) è un'unità logaritmica usata per esprimere rapporti di potenza. Ogni 10~dB in più corrispondono a una potenza 10 volte maggiore; ogni 3~dB in più corrispondono circa al doppio della potenza.}.
 
 I parametri tipici di un collegamento LoRaWAN a 868~MHz sono:
 \begin{itemize}
@@ -237,7 +237,14 @@ I parametri tipici di un collegamento LoRaWAN a 868~MHz sono:
 
 Nella banda ISM a 868~MHz, la normativa europea impone che ogni dispositivo non trasmetta per più dell'1\,\% del tempo su un dato canale~\cite{etsi300220}. Il \textit{duty-cycle} è semplicemente il rapporto tra il tempo in cui il dispositivo trasmette e il tempo totale osservato.
 
-Per un singolo pacchetto LoRaWAN con 20~byte di \textit{payload}, SF9, BW~=~125~kHz e CR~=~4/5, il tempo di trasmissione (\textit{Time-on-Air}) è circa 165~ms\footnote{Il valore è calcolabile con un \textit{tool} online Semtech o con le formule della specifica SX1276; per semplicità si riporta direttamente il risultato.}. Ogni nodo trasmette una volta ogni 15~minuti, quindi 4 volte all'ora. Il duty-cycle di un singolo nodo è:
+Per un singolo pacchetto LoRaWAN con 20~byte di \textit{payload}\footnote{Il \textit{payload} è la porzione utile del pacchetto, ovvero i dati effettivi (valori dei sensori) escluse le intestazioni di protocollo.}, la durata della trasmissione dipende dai parametri radio configurati. LoRa utilizza tre impostazioni principali:
+\begin{itemize}
+	\item \textbf{Spreading Factor (SF)}: determina la ``ridondanza'' del segnale. Valori più alti (da SF7 a SF12) aumentano la portata e la resistenza al rumore, ma allungano il tempo di trasmissione. Qui si usa SF9, un compromesso tra portata e velocità.
+	\item \textbf{Bandwidth (BW)}: la larghezza della banda di frequenza utilizzata. Il valore standard europeo è 125~kHz; una banda più larga consente trasmissioni più rapide ma con minor sensibilità.
+	\item \textbf{Coding Rate (CR)}: il livello di correzione d'errore aggiunto al pacchetto. Con CR~=~4/5 si aggiunge un 25\,\% di dati ridondanti per recuperare eventuali bit corrotti durante la trasmissione.
+\end{itemize}
+
+\noindent Con questa configurazione (SF9, BW~=~125~kHz, CR~=~4/5), il tempo che il trasmettitore occupa il canale radio per inviare un singolo pacchetto --- detto \textit{Time-on-Air} --- è circa 165~ms\footnote{Il valore è calcolabile con gli strumenti online forniti da Semtech (produttore dei chip LoRa) o con le formule della specifica SX1276; per semplicità si riporta direttamente il risultato.}. Ogni nodo trasmette una volta ogni 15~minuti, quindi 4 volte all'ora. Il duty-cycle di un singolo nodo è:
 
 \[
     DC_{\text{nodo}} = \frac{4 \times 0{,}165 \text{\,s}}{3600 \text{\,s}} \approx 0{,}018\,\%
@@ -253,7 +260,16 @@ Per un singolo pacchetto LoRaWAN con 20~byte di \textit{payload}, SF9, BW~=~125~
 
 \subsection{Energy Budget}
 
-Per stimare l'autonomia di un nodo a batteria si calcola il consumo medio di corrente, tenendo conto che il nodo trascorre la quasi totalità del tempo in stato di riposo (\textit{deep sleep}). La Tabella~\ref{tab:energy_profile} riporta i tre stati operativi di un nodo sensore Classe~A.
+Per stimare l'autonomia di un nodo a batteria si calcola il consumo medio di corrente, tenendo conto che il nodo trascorre la quasi totalità del tempo in stato di riposo (\textit{deep sleep}). 
+
+Durante ogni ciclo di 15~minuti (900~secondi), il nodo attraversa tre stati distinti, ciascuno con un consumo di corrente molto diverso:
+\begin{enumerate}
+	\item \textbf{Deep sleep} --- il microcontrollore e il modulo radio sono completamente spenti; resta attivo solo un piccolo oscillatore interno che funge da sveglia. Il consumo è dell'ordine di pochi microampere (milionesimi di ampere), paragonabile alla corrente di autoscarica della batteria stessa. Questo stato occupa oltre il 99{,}9\,\% della durata del ciclo.
+	\item \textbf{Misura sensori} --- il microcontrollore si risveglia, alimenta i sensori collegati e ne legge i valori tramite i bus di comunicazione locale (I\textsuperscript{2}C o SDI-12). Il consumo sale a circa 10~milliampere, ma la durata è brevissima (circa 0{,}2~secondi).
+	\item \textbf{Trasmissione} --- il modulo radio si accende, invia il pacchetto LoRa e apre due brevi finestre di ricezione (come previsto dalla Classe~A). È la fase a maggior consumo ($\sim$45~mA), ma anch'essa dura una frazione di secondo.
+\end{enumerate}
+
+\noindent La Tabella~\ref{tab:energy_profile} riassume questi tre stati.
 
 \begin{table}[H]
     \centering
@@ -317,48 +333,3 @@ La catena temporale dall'evento fisico alla notifica all'operatore è composta d
 
 \noindent In modalità \textit{event-driven} (campionamento ogni 1~minuto, attivata quando la temperatura scende sotto i 3\,°C), la latenza complessiva si riduce a circa \textbf{1~minuto}, ben entro il requisito di 5~minuti.
 
-\subsection{Stima dei Costi}
-
-La Tabella~\ref{tab:stima_costi} riporta una stima di massima del costo dei componenti principali del sistema.
-
-\begin{table}[H]
-    \centering
-    \small
-    \begin{tabularx}{\textwidth}{|X|c|c|c|}
-        \hline
-        \textbf{Componente} & \textbf{Quantità} & \textbf{Costo unitario (\texteuro)} & \textbf{Costo totale (\texteuro)} \\
-        \hline
-        Nodo ambientale (MCU + sensori + LoRa + involucro + batteria) & 12 & $\sim$45 & $\sim$540 \\
-        \hline
-        Nodo umidità suolo (MCU + sonde + LoRa + involucro + batteria) & 4 & $\sim$60 & $\sim$240 \\
-        \hline
-        Stazione meteo (sensori meteo + MCU + LoRa + alimentazione) & 1 & $\sim$150 & $\sim$150 \\
-        \hline
-        Nodo attuatore (MCU + LoRa + relè + involucro) & 4 & $\sim$40 & $\sim$160 \\
-        \hline
-        Gateway LoRaWAN & 2 & $\sim$250 & $\sim$500 \\
-        \hline
-        Fog node (single-board computer + alimentatore + custodia) & 1 & $\sim$90 & $\sim$90 \\
-        \hline
-        Router 4G & 1 & $\sim$60 & $\sim$60 \\
-        \hline
-        Infrastruttura cloud (hosting annuo) & 1 & $\sim$120/anno & $\sim$120/anno \\
-        \hline
-        \hline
-        \textbf{Totale hardware (una tantum)} & & & $\sim$\textbf{1\,740} \\
-        \hline
-        \textbf{Costo operativo annuo} (cloud + connettività 4G) & & & $\sim$\textbf{240/anno} \\
-        \hline
-    \end{tabularx}
-    \caption{Stima dei costi del sistema (esclusa installazione e manodopera).}
-    \label{tab:stima_costi}
-\end{table}
-
-\noindent Il costo complessivo dell'hardware è contenuto ($<$2\,000~\texteuro) e risulta ampiamente giustificato dal valore del raccolto protetto, considerando che una singola infezione fungina non gestita può causare perdite di decine di migliaia di euro.
-
-
-\section{Conclusioni}
-
-Il caso di studio ha dimostrato come i vincoli e i compromessi progettuali individuati nei capitoli precedenti si traducano in scelte architetturali concrete. L'architettura a tre livelli proposta bilancia autonomia locale e funzionalità cloud, mentre le stime ingegneristiche confermano la fattibilità tecnica ed economica del sistema: il duty-cycle rimane ampiamente entro i limiti regolamentari, l'autonomia energetica supera i requisiti minimi e la latenza di allerta è compatibile con gli scenari critici. Il costo contenuto ($<$2\,000~\texteuro{} di hardware) rende la soluzione accessibile anche per un'azienda viticola di medie dimensioni.
-
-Il principale limite del caso presentato è l'assenza di validazione sperimentale: le stime si basano su specifiche nominali dei componenti e su modelli di propagazione teorici. Un eventuale \textit{deployment} reale richiederebbe una fase di \textit{site survey} per verificare la copertura radio, la calibrazione dei sensori e l'ottimizzazione dei parametri di trasmissione alle condizioni specifiche del sito.
