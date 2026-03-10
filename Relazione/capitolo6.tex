@@ -1,398 +1,53 @@
-\section{Descrizione del Caso di Studio}
 
-I capitoli precedenti hanno individuato requisiti, vincoli e compromessi progettuali che caratterizzano qualsiasi sistema IoT per l'agricoltura di precisione. L'analisi del caso SWAMP ha mostrato come tali vincoli emergano concretamente in un sistema reale.
+\subsection*{Dichiarazione sull'uso di Strumenti di Intelligenza Artificiale Generativa}
 
-Il presente capitolo intende tradurre l'analisi teorica in un esercizio di progettazione, definendo un caso di studio realistico e sviluppando una proposta architetturale corredata di stime ingegneristiche quantitative. 
+Nel corso della redazione del presente elaborato è stato impiegato uno strumento di Intelligenza Artificiale Generativa a supporto delle attività di analisi, revisione e organizzazione dei contenuti.
 
-\subsection{Contesto Territoriale e Produttivo}
+\noindent L'utilizzo dell'AI non ha sostituito il contributo intellettuale del gruppo, ma ha rappresentato un supporto metodologico nelle seguenti attività.
 
-Il caso di studio riguarda un'azienda viticola situata in Irpinia, nella provincia di Avellino, all'interno della zona di produzione della DOCG (Denominazione di Origine Controllata e Garantita) Taurasi. Il vigneto si estende su una superficie complessiva di circa 15~ettari, distribuiti su un'area collinare con altitudini comprese tra 350 e 430~metri sul livello del mare. I filari sono orientati prevalentemente in direzione est-ovest e seguono l'andamento naturale del pendio, con dislivelli interni al fondo fino a circa 80~metri.
+\subsubsection*{1. Supporto alla scelta del dominio applicativo}
 
-L'area è caratterizzata da un clima mediterraneo collinare, con inverni moderatamente freddi, estati calde e secche e precipitazioni concentrate nei mesi autunnali e primaverili. Le escursioni termiche giornaliere sono significative, specialmente nei mesi di settembre e ottobre, periodo in cui la maturazione delle uve Aglianico richiede un monitoraggio attento delle condizioni microclimatiche.
+In una fase preliminare è stato richiesto all'AI un confronto sintetico tra diversi domini IoT (Domotica, Smart City, Medical, Industrial, Agricoltura, Logistica, Fleet Monitoring), al fine di evidenziare le principali criticità ingegneristiche tipiche di ciascun settore.
 
-La viticoltura di qualità, regolamentata dal disciplinare DOCG, impone vincoli stringenti sulle rese per ettaro e sulla gestione agronomica, rendendo economicamente giustificato l'investimento in tecnologie di monitoraggio avanzato. La perdita anche parziale di un raccolto a causa di patologie non tempestivamente rilevate o di eventi meteorologici non gestiti può comportare danni economici dell'ordine di decine di migliaia di euro.
-
-\subsection{Obiettivi del Sistema IoT}
-
-Il sistema IoT che si intende progettare persegue quattro obiettivi operativi principali:
-
+In particolare, sono stati analizzati aspetti quali:
 \begin{itemize}
-	\item \textbf{Prevenzione fitosanitaria}: il monitoraggio continuo di temperatura, umidità relativa dell'aria e bagnatura fogliare consente di rilevare le condizioni ambientali favorevoli allo sviluppo delle principali patologie fungine della vite, quali la peronospora\footnote{La peronospora (\textit{Plasmopara viticola}) è una malattia fungina che colpisce foglie, germogli e grappoli della vite. Si sviluppa in presenza di elevata umidità e temperature miti (10--25\,°C), causando necrosi fogliari e marciume dei grappoli con perdite di resa che possono superare il 50\,\% in annate favorevoli al patogeno.} e l'oidio\footnote{L'oidio (\textit{Erysiphe necator}) è un fungo che si manifesta come una patina biancastra su foglie e acini. A differenza della peronospora, non richiede bagnatura fogliare ma prospera con temperature tra 20 e 30\,°C e umidità relativa moderata. Sugli acini provoca spaccature che favoriscono infezioni secondarie, compromettendo la qualità dell'uva.}. Coerentemente con l'approccio di precisione descritto nei capitoli precedenti, il superamento simultaneo di soglie critiche configurabili genera notifiche di allerta che permettono all'agronomo di intervenire in modo mirato, riducendo i trattamenti alle sole finestre temporali di reale rischio.
-
-	\item \textbf{Monitoraggio dello stress idrico}: la misura dell'umidità del suolo a diverse profondità consente di valutare la disponibilità idrica nella zona radicale e di individuare condizioni di stress, particolarmente critiche nelle fasi di maturazione.
-
-	\item \textbf{Allerta gelate primaverili}: nelle zone collinari irpine, gelate tardive tra marzo e aprile possono danneggiare gravemente i germogli in fase di sviluppo. Un sistema di allarme basato sul rilevamento in tempo quasi reale di temperature prossime a 0\,°C consente di attivare contromisure tempestive (ad esempio ventilatori antigelo o bruciatori).
-
-	\item \textbf{Irrigazione di soccorso}: sebbene la viticoltura DOCG Taurasi non preveda irrigazione sistematica, in annate particolarmente siccitose è consentita l'irrigazione di soccorso. Il sistema deve poter comandare l'apertura di elettrovalvole in settori specifici del vigneto, sulla base dei dati di umidità del suolo.
+    \item requisiti di latenza (real-time critico vs best-effort),
+    \item vincoli energetici,
+    \item problematiche di sicurezza e privacy,
+    \item complessità dell'ambiente operativo,
+    \item scalabilità del sistema.
 \end{itemize}
 
-\subsection{Vincoli Normativi e Regolamentari}
+\noindent Questo confronto ha permesso al gruppo di maturare una scelta consapevole del dominio ritenuto soggettivamente più interessante, non in termini di semplicità, ma di ricchezza di trade-off progettuali.
 
-Oltre ai vincoli tecnici propri di qualsiasi sistema IoT agricolo, il caso di studio è soggetto a vincoli regolamentari specifici che influenzano direttamente la progettazione:
+\noindent La decisione finale è stata presa autonomamente dal gruppo, sulla base di considerazioni critiche.
 
+\subsubsection*{2. Revisione sintattica e miglioramento espositivo}
+
+L'AI è stata utilizzata per effettuare revisioni linguistiche su testi già redatti dal gruppo, con l'obiettivo di:
 \begin{itemize}
-	\item \textbf{Banda ISM 868\,MHz}: conformemente alla normativa ETSI EN~300~220~\cite{etsi300220}, i dispositivi che operano nella sotto-banda a 868\,MHz sono soggetti a un \textit{duty-cycle} massimo dell'1\,\%, pari a un tempo di trasmissione cumulativo non superiore a 36~secondi per ora. Tale vincolo limita il numero e la frequenza delle trasmissioni per ciascun nodo.
-
-	\item \textbf{Disciplinare DOCG Taurasi}: il disciplinare di produzione impone rese massime per ettaro e restrizioni sulle pratiche agronomiche ammesse, incluse le condizioni per l'irrigazione di soccorso. Tali vincoli non sono di natura tecnologica ma condizionano i requisiti funzionali del sistema (ad esempio, la granularità del monitoraggio necessaria per documentare le condizioni che giustificano l'intervento irriguo).
-
-	\item \textbf{Regolamento generale sulla protezione dei dati (GDPR)}: i dati raccolti dal sistema, pur non essendo dati personali in senso stretto, possono rientrare nella definizione di dati aziendali sensibili ai fini della competitività. L'architettura dovrà garantire la protezione dell'integrità e della riservatezza delle informazioni trasmesse e archiviate.
+    \item migliorare la chiarezza espositiva,
+    \item rendere più rigoroso il linguaggio tecnico,
+    \item evitare ripetizioni e ambiguità sintattiche.
 \end{itemize}
 
+\noindent I contenuti tecnici, le analisi dei requisiti e le valutazioni ingegneristiche restano frutto esclusivo dell'elaborazione del gruppo.
 
-\section{Analisi dei Requisiti e dei Vincoli}
+\subsubsection*{3. Supporto alla fase esplorativa del caso di studio}
 
-L'analisi che segue mappa i sette punti critici individuati nel Capitolo~4 sul caso specifico del vigneto irpino, evidenziando come ciascun vincolo si declini nel contesto operativo reale.
+Per il Capitolo 3, relativo all'analisi di un caso di studio reale, è stato richiesto all'AI di individuare diversi possibili casi di applicazioni IoT coerenti con il dominio selezionato.
 
-\paragraph{Energia.} I nodi sensore saranno installati in pieno campo, privi di accesso alla rete elettrica. L'alimentazione sarà interamente a batteria, eventualmente integrata da \textit{energy harvesting} fotovoltaico. Il vincolo è aggravato dal clima irpino: in inverno le giornate corte e la copertura nuvolosa limitano la ricarica solare, mentre il monitoraggio per l'allerta gelate è necessario proprio nei mesi a minor irraggiamento (marzo--aprile). Il \textit{power budget} dovrà quindi garantire il funzionamento autonomo anche senza ricarica solare prolungata, adottando un profilo di \textit{deep sleep} interrotto da brevi cicli di misura e trasmissione, con commutazione a modalità \textit{event-driven} in prossimità delle soglie di gelata.
-
-\paragraph{Connettività e latenza.} I requisiti di latenza sono eterogenei: il monitoraggio ambientale e fitosanitario tollera ritardi di 15--30~minuti, l'umidità del suolo fino a 30--60~minuti, mentre l'allerta gelate richiede una latenza \textit{end-to-end} inferiore a 5~minuti. Il comando degli attuatori non ha vincoli di tempo reale stretto ma necessita di conferma di ricezione. Il traffico è estremamente contenuto (poche decine di byte per pacchetto); la criticità risiede nella copertura radio in ambiente collinare con vegetazione e dislivelli, non nella capacità del canale.
-
-\paragraph{Topologia e ambiente operativo.} Il terreno collinare con dislivello di circa 80~metri e i filari a vegetazione piena introducono condizioni NLoS\footnote{\textit{Non-Line-of-Sight} (NLoS): condizione di propagazione radio in cui tra trasmettitore e ricevitore non esiste un percorso ottico diretto, a causa di ostacoli fisici quali rilievi, edifici o vegetazione. L'assenza di visibilità diretta causa attenuazione e riflessione del segnale, riducendo la portata effettiva rispetto alle condizioni ideali.}. L'area di 15~ettari ($\sim$500$\times$300~m) implica distanze massime nodo-gateway di 600--700~m. I nodi saranno difficilmente raggiungibili nei mesi estivi e durante le piogge (terreno argilloso), imponendo una progettazione a minima manutenzione. Le condizioni ambientali (pioggia, escursioni termiche da $-$2 a +35\,°C, radiazione UV, sollecitazioni meccaniche) richiedono protezione IP65\footnote{La sigla IP65, definita dalla norma IEC~60529, indica un grado di protezione dell'involucro contro agenti esterni: la cifra 6 certifica la totale protezione contro la polvere (\textit{dust-tight}), mentre la cifra 5 garantisce la resistenza a getti d'acqua da qualsiasi direzione. È il livello minimo comunemente adottato per dispositivi elettronici installati permanentemente all'aperto.} o superiore. La topologia sarà a stella, con comunicazione diretta nodo-gateway senza \textit{multi-hop}\footnote{In una rete \textit{multi-hop}, i messaggi raggiungono la destinazione transitando attraverso nodi intermedi che fungono da ripetitori. Ciò estende la copertura ma aumenta la complessità, la latenza e il consumo energetico dei nodi coinvolti nell'instradamento. In una topologia a stella, invece, ogni nodo comunica direttamente con il gateway.}.
-
-\paragraph{Sicurezza.} L'integrità dei dati ambientali è necessaria per evitare decisioni agronomiche errate; la cifratura AES-128 integrata in LoRaWAN fornisce una protezione di base adeguata. I comandi di attuazione (elettrovalvole) richiedono autenticazione bidirezionale e conferma di esecuzione. La sicurezza fisica è un rischio concreto: i nodi esposti in campo aperto potrebbero essere manomessi, rendendo necessari meccanismi di rilevamento delle anomalie a livello di piattaforma. Il livello di sicurezza complessivo è medio, bilanciando protezione e costo energetico.
-
-\paragraph{Scalabilità.} Con circa 20~nodi previsti, il sistema si colloca ben al di sotto delle soglie critiche della piattaforma software ($\sim$10.000--15.000~sensori nel caso SWAMP). La criticità di scalabilità riguarda piuttosto la capacità del canale radio e il rispetto dei limiti di \textit{duty-cycle} ISM al crescere dei dispositivi. L'architettura dovrà comunque essere modulare per consentire espansioni future (altri appezzamenti, nuove tipologie di sensori).
-
-\paragraph{Cloud vs. fog.} La connettività Internet dell'area (4G con segnale variabile, assenza di fibra ottica) impone che le funzionalità critiche --- allerta gelate, comando irrigazione, \textit{buffering} dei dati --- siano garantite localmente da un nodo fog, indipendentemente dalla raggiungibilità del cloud. Al cloud sono delegabili l'archiviazione storica, la \textit{dashboard} di visualizzazione e l'integrazione con servizi esterni (previsioni meteo, piattaforme consortili).
-
-\paragraph{Manutenibilità.} L'azienda non dispone di personale tecnico specializzato. L'autonomia delle batterie dovrà essere di almeno 3--5~anni, oppure garantita indefinitamente dalla ricarica solare, per evitare sostituzioni frequenti su 15~ettari. L'aggiornamento OTA\footnote{\textit{Over The Air} (OTA): procedura di aggiornamento del firmware di un dispositivo eseguita da remoto tramite la rete wireless, senza necessità di accesso fisico al nodo.} del firmware è desiderabile ma non indispensabile alla scala attuale. Il sistema dovrà includere un monitoraggio basilare dello stato dei dispositivi (livello batteria, RSSI\footnote{\textit{Received Signal Strength Indicator} (RSSI): misura della potenza del segnale radio ricevuto, espressa in dBm. Valori più elevati (meno negativi) indicano un collegamento più robusto.}, SNR\footnote{\textit{Signal-to-Noise Ratio} (SNR): rapporto tra la potenza del segnale utile e quella del rumore di fondo, espresso in dB. Un SNR elevato indica una comunicazione più affidabile e meno soggetta a errori di decodifica.}, regolarità delle trasmissioni) e gli involucri dovranno resistere a UV, pioggia e sollecitazioni meccaniche (IP65, fissaggio stabile).
-
-\subsection{Sintesi dei Vincoli e delle Scelte Adottate}
-
-La Tabella~\ref{tab:vincoli_vigneto} riassume la mappatura dei punti critici generali sul caso specifico del vigneto, le criticità dominanti e le strategie progettuali individuate.
-
-\begin{table}[H]
-	\centering
-	\small
-	\begin{tabularx}{\textwidth}{|l|X|X|}
-		\hline
-		\textbf{Punto Critico} & \textbf{Declinazione nel Caso di Studio} & \textbf{Strategia Adottata} \\
-		\hline
-		Energia vs. campionamento & Nodi a batteria senza rete elettrica; inverni con scarso irraggiamento; monitoraggio necessario tutto l'anno & Batteria LiSOCl\textsubscript{2} ad alta capacità + pannello solare ausiliario; \textit{deep sleep} con \textit{duty cycling} aggressivo; modalità \textit{event-driven} per soglie critiche \\
-		\hline
-		Connettività e latenza & Requisiti eterogenei: 15--30~min per monitoraggio, $<$5~min per allerta gelate; traffico contenuto (decine di byte) & Trasmissioni periodiche ogni 15~min; invio immediato al superamento di soglie; conferma ricezione per comandi attuatori \\
-		\hline
-		Limiti \textit{duty cycle} ISM & 20 nodi in banda 868\,MHz con \textit{duty cycle} max 1\,\%~\cite{etsi300220} & Verifica analitica del \textit{duty cycle} per nodo e aggregato; payload compatti \\
-		\hline
-		Topologia e ambiente & Terreno collinare NLoS, distanze max $\sim$700~m, vegetazione stagionale, condizioni meteo avverse & Topologia a stella; protezione IP65; gateway in posizione elevata; minima manutenzione \\
-		\hline
-		Sicurezza & Integrità dati per decisioni agronomiche; protezione comandi attuatori; nodi fisicamente esposti & AES-128 LoRaWAN; autenticazione bidirezionale su attuatori; rilevamento anomalie a livello fog \\
-		\hline
-		Scalabilità & $\sim$20 nodi, ben sotto soglia critica software; possibile espansione futura & Architettura modulare; protocolli standard; vincolo su capacità canale radio \\
-		\hline
-		Cloud vs. fog & Connettività 4G instabile; funzionalità critiche (allerta, attuazione) non delegabili & Fog node locale per allerta e irrigazione; cloud per storicizzazione, \textit{dashboard} e servizi esterni \\
-		\hline
-		Manutenibilità & Personale non tecnico; accesso difficile in estate e con pioggia & Autonomia batteria $\geq$3~anni; \textit{device management} remoto (batteria, RSSI, SNR); involucri IP65 resistenti a UV \\
-		\hline
-	\end{tabularx}
-	\caption{Sintesi dei vincoli e delle scelte progettuali per il caso di studio del vigneto irpino.}
-	\label{tab:vincoli_vigneto}
-\end{table}
-
-\noindent L'analisi conferma che i vincoli identificati nei capitoli precedenti si manifestano concretamente nel contesto operativo reale e sono tra loro interdipendenti. Le sezioni successive tradurranno queste considerazioni in scelte architetturali e stime quantitative.
-
-
-\section{Architettura del Sistema}
-
-L'architettura proposta è organizzata su tre livelli funzionali, coerentemente con la scala contenuta del sistema e con il paradigma \textit{cloud-fog} ibrido già discusso nell'analisi del caso SWAMP. Ciascun livello ha un obiettivo specifico e impiega protocolli adeguati al proprio ruolo nella catena di acquisizione, elaborazione e presentazione dei dati.
-
-\subsection{Livello 1: Dispositivo e Comunicazione di Campo}
-
-\paragraph{Obiettivo.} Acquisire le grandezze fisiche di interesse (temperatura, umidità dell'aria, bagnatura fogliare, umidità del suolo, temperatura del suolo, velocità del vento, precipitazioni) e trasmetterle verso il gateway con il minimo consumo energetico.
-
-\paragraph{Componenti.} Il livello comprende tre tipologie di nodi:
-
+\noindent Lo strumento è stato utilizzato come supporto esplorativo con lo scopo di:
 \begin{itemize}
-	\item \textbf{Nodi ambientali} ($\sim$12--15 unità): distribuiti nei filari, ciascuno equipaggiato con sensori di temperatura e umidità dell'aria, sensore di bagnatura fogliare e modulo radio LoRa. Alimentazione a batteria con pannello solare ausiliario.
-
-	\item \textbf{Nodi di umidità del suolo} ($\sim$4 unità): installati nella zona radicale a diverse profondità, dotati di sonde resistive o capacitive per la misura del contenuto idrico. Alimentazione a batteria.
-
-	\item \textbf{Nodi attuatore} ($\sim$4 unità): collegati alle elettrovalvole dell'impianto di irrigazione di soccorso. A differenza dei nodi sensore, richiedono la ricezione di comandi dal gateway e pertanto operano in modalità LoRaWAN Classe~C\footnote{Nella specifica LoRaWAN, la Classe~A prevede finestre di ricezione solo immediatamente dopo una trasmissione in \textit{uplink}, minimizzando il consumo ma limitando la raggiungibilità del nodo. La Classe~C mantiene invece il ricevitore sempre attivo quando non trasmette, consentendo la ricezione di comandi in qualsiasi momento a fronte di un consumo energetico più elevato, sostenibile solo con alimentazione da rete elettrica.} (\textit{always-on receive}), alimentati dalla rete elettrica dell'impianto irriguo.
+    \item ridurre il tempo necessario alla fase preliminare di ricerca,
+    \item filtrare i casi meno pertinenti,
+    \item concentrare l'attenzione su soluzioni effettivamente implementate nel mondo reale.
 \end{itemize}
 
-\paragraph{Protocolli.}
-
-\begin{itemize}
-	\item \textbf{LoRaWAN} (banda ISM 868\,MHz): protocollo LPWAN per la comunicazione nodo $\rightarrow$ gateway. I nodi sensore operano in \textbf{Classe~A} (minor consumo, trasmissione \textit{uplink-only} con brevi finestre di ricezione); i nodi attuatore in \textbf{Classe~C} (ricezione continua per la ricezione di comandi \textit{downlink}).
-	\item \textbf{I\textsuperscript{2}C / SDI-12}\footnote{I\textsuperscript{2}C (\textit{Inter-Integrated Circuit}) è un bus seriale sincrono a due fili per la comunicazione a corto raggio tra microcontrollore e sensori sulla stessa scheda. SDI-12 (\textit{Serial Digital Interface at 1200 baud}) è uno standard specifico per sensori ambientali da campo, progettato per basse velocità e basso consumo su distanze fino a circa 60~metri.}: protocolli di comunicazione locale tra il microcontrollore e i sensori a bordo del nodo.
-\end{itemize}
+\noindent La selezione finale del caso di studio è stata effettuata dal gruppo, sulla base della coerenza con i requisiti progettuali identificati nel Capitolo 2.
 
 
-\subsection{Livello 2: Gateway e Fog Computing}
+\subsubsection*{4. Supporto alla formattazione Latex}
 
-\paragraph{Obiettivo.} Raccogliere i dati dai nodi di campo, eseguire localmente le funzionalità critiche (allerta gelate, comando irrigazione, \textit{buffering} dei dati) e garantire l'operatività del sistema anche in assenza di connessione Internet.
-
-\paragraph{Componenti.} Il livello comprende:
-
-\begin{itemize}
-	\item \textbf{Gateway LoRaWAN} (1--2 unità): ricevono i pacchetti LoRa dai nodi di campo e li inoltrano al fog node tramite rete locale. Posizionati in quota (sul tetto della cantina o su un palo) per massimizzare la copertura radio. Un secondo gateway è previsto come ridondanza in caso di guasto o per migliorare la copertura delle zone NLoS.
-
-	\item \textbf{Fog node}: un dispositivo a basso consumo e costo contenuto (ad esempio un single-board computer) installato presso la cantina aziendale, con alimentazione da rete elettrica e connessione al gateway tramite Ethernet o Wi-Fi locale. Esegue la logica di allerta e attuazione, il \textit{buffering} locale dei dati e la sincronizzazione con il cloud al ripristino della connettività.
-\end{itemize}
-
-\paragraph{Protocolli.}
-
-\begin{itemize}
-	\item \textbf{MQTT}\footnote{MQTT (\textit{Message Queuing Telemetry Transport}) è un protocollo di messaggistica \textit{publish-subscribe} progettato per connessioni a banda limitata e dispositivi con risorse ridotte. Il broker MQTT funge da intermediario: i dispositivi pubblicano messaggi su \textit{topic} e i sottoscrittori li ricevono in modo asincrono ed efficiente.}: protocollo \textit{publish-subscribe} leggero per il transito dei dati dal gateway al fog node (broker MQTT locale) e dal fog node al cloud (broker MQTT remoto). I nodi sensore pubblicano le misure su \textit{topic} organizzati per zona e tipologia; il fog node sottoscrive i \textit{topic} rilevanti per l'elaborazione locale.
-	\item \textbf{Ethernet / Wi-Fi}: connessione locale tra gateway e fog node.
-	\item \textbf{4G (LTE)}: connessione del fog node verso Internet per la sincronizzazione con il livello cloud, tramite router cellulare.
-	\item \textbf{NTP}\footnote{NTP (\textit{Network Time Protocol}) è un protocollo per la sincronizzazione degli orologi dei dispositivi in rete con riferimenti temporali accurati. La coerenza temporale è essenziale per correlare correttamente le misure provenienti da nodi diversi e per la marcatura temporale degli eventi di allerta.}: sincronizzazione temporale del fog node e, indirettamente, dei \textit{timestamp} assegnati ai dati ricevuti.
-\end{itemize}
-
-
-\subsection{Livello 3: Cloud e Applicazione}
-
-\paragraph{Obiettivo.} Archiviare lo storico dei dati, fornire strumenti di visualizzazione e analisi all'operatore e garantire l'accessibilità remota al sistema tramite interfacce web.
-
-\paragraph{Componenti.}
-
-\begin{itemize}
-	\item \textbf{Broker MQTT remoto}: punto di ingresso dei dati nel cloud, riceve i messaggi pubblicati dal fog node.
-	\item \textbf{Database \textit{time-series}}: archiviazione ottimizzata per serie temporali di dati sensoriali, con politiche di \textit{retention} configurabili (ad esempio dati grezzi per 1~anno, dati aggregati per 5~anni).
-	\item \textbf{Dashboard di visualizzazione}: interfaccia web per la consultazione in tempo reale e la visualizzazione dello storico (grafici, mappe di calore, stato dei dispositivi).
-	\item \textbf{Servizio di notifica}: invio di allarmi via SMS, e-mail o notifiche push all'operatore, come canale complementare all'allerta locale del fog node.
-\end{itemize}
-
-\paragraph{Protocolli.}
-
-\begin{itemize}
-	\item \textbf{MQTT / TLS}: comunicazione fog $\rightarrow$ cloud con cifratura del canale tramite TLS\footnote{TLS (\textit{Transport Layer Security}) è un protocollo crittografico che garantisce riservatezza e integrità dei dati trasmessi su una rete. Utilizzato sopra MQTT, assicura che i dati in transito tra fog node e cloud non possano essere intercettati o alterati.} per la protezione dei dati in transito.
-	\item \textbf{HTTPS / REST}: protocollo per l'accesso alla dashboard e alle API di configurazione da parte dell'operatore.
-\end{itemize}
-
-
-\subsection{Sintesi dell'Architettura}
-
-La Tabella~\ref{tab:architettura_livelli} riassume i tre livelli, i componenti principali, i protocolli impiegati e le funzionalità garantite da ciascuno.
-
-\begin{table}[H]
-	\centering
-	\small
-	\begin{tabularx}{\textwidth}{|l|X|X|X|}
-		\hline
-		\textbf{Livello} & \textbf{Componenti} & \textbf{Protocolli} & \textbf{Funzionalità} \\
-		\hline
-		1 -- Dispositivo & Nodi ambientali, nodi suolo, nodi attuatore & LoRaWAN (Classe A/C), I\textsuperscript{2}C, SDI-12 & Acquisizione dati, comando elettrovalvole \\
-		\hline
-		2 -- Fog & Gateway LoRaWAN, fog node & MQTT, Ethernet/Wi-Fi, 4G, NTP & Allerta gelate, comando irrigazione, buffering, sincronizzazione \\
-		\hline
-		3 -- Cloud & Broker MQTT, DB time-series, dashboard, notifiche & MQTT/TLS, HTTPS/REST & Archiviazione storica, visualizzazione, notifiche remote \\
-		\hline
-	\end{tabularx}
-	\caption{Architettura a tre livelli del sistema IoT per il vigneto irpino.}
-	\label{tab:architettura_livelli}
-\end{table}
-
-
-\section{Stime}
-
-Le stime che seguono traducono i requisiti e le scelte architetturali in valori quantitativi, fornendo un dimensionamento di massima del sistema.
-
-\subsection{Dimensionamento dei Nodi}
-
-Il numero di nodi è determinato dalla necessità di catturare la variabilità microclimatica del vigneto e dalla copertura delle diverse zone di gestione. La Tabella~\ref{tab:dimensionamento_nodi} riassume il dimensionamento proposto.
-
-\begin{table}[H]
-    \centering
-    \small
-    \begin{tabularx}{\textwidth}{|l|c|X|}
-        \hline
-        \textbf{Tipologia} & \textbf{Quantità} & \textbf{Criterio} \\
-        \hline
-        Nodi ambientali & 12 & $\sim$1 nodo ogni 1,2~ha, distribuiti per catturare le differenze microclimatiche tra zona bassa, media e alta del pendio \\
-        \hline
-        Nodi umidità suolo & 4 & 1 per ciascuna delle 4 zone di gestione irrigua, con sonde a 30 e 60~cm di profondità \\
-        \hline
-        Stazione meteo & 1 & Installata in posizione centrale e aperta; misura precipitazioni, velocità del vento, pressione atmosferica \\
-        \hline
-        Nodi attuatore & 4 & 1 per ciascuna elettrovalvola dei 4 settori di irrigazione di soccorso \\
-        \hline
-        \textbf{Totale} & \textbf{21} & \\
-        \hline
-    \end{tabularx}
-    \caption{Dimensionamento dei nodi del sistema.}
-    \label{tab:dimensionamento_nodi}
-\end{table}
-
-\subsection{Copertura Radio e Link Budget}
-
-Per verificare che il segnale LoRa raggiunga il gateway da ogni punto del vigneto, si calcola il \textit{link budget}, ovvero il bilancio tra la potenza emessa dal trasmettitore e la sensibilità minima del ricevitore. Il link budget indica ``quanti dB di attenuazione'' il collegamento radio può tollerare prima di perdere il segnale\footnote{Il decibel (dB) è un'unità logaritmica usata per esprimere rapporti di potenza. Ogni 10~dB in più corrispondono a una potenza 10 volte maggiore; ogni 3~dB in più corrispondono circa al doppio della potenza.}.
-La potenza ricevuta dal gateway può essere modellata secondo l'equazione del bilancio di collegamento:
-$$P_{rx} = P_{tx} + G_{tx} + G_{rx} - L_{total}$$
-Dove:
-\begin{itemize}
-	\item $P_{tx}$ è la potenza del trasmettitore ($14\text{ dBm}$);
-	\item $G_{tx}$ e $G_{rx}$ sono i guadagni delle antenne;
-	\item $L_{total}$ rappresenta l'attenuazione massima ammissibile (Path Loss).
-\end{itemize}
-Affinché la comunicazione sia affidabile, deve essere garantita la condizione:
-\begin{equation}
-	P_{rx} \geq S
-\end{equation}
-\noindent dove $S$ è la sensibilità del ricevitore ($-137\text{ dBm}$).\newline
-
-\noindent I parametri tipici di un collegamento LoRaWAN a 868~MHz sono:
-\begin{itemize}
-    \item \textbf{Potenza di trasmissione:} +14~dBm (il massimo consentito dalla normativa ISM europea);
-    \item \textbf{Guadagno antenna gateway:} +6~dBi (antenna omnidirezionale in quota);
-    \item \textbf{Sensibilità del ricevitore:} $-137$~dBm (con SF9 e BW~=~125~kHz), cioè il livello minimo di segnale che il ricevitore riesce a decodificare.
-\end{itemize}
-
-\noindent Il link budget si ottiene semplicemente sommando le componenti ``a favore'' e sottraendo quelle ``contro'':
-
-\[
-    LB = 14 + 6 - (-137) = 157 \text{\,dB}
-\]
-
-\noindent Questo significa che il segnale può subire fino a 157~dB di attenuazione prima di diventare indecifrabile. In ambiente collinare con vegetazione, la letteratura riporta portate tipiche di 1--2~km per LoRa a SF9~\cite{LoRa}. Poiché la distanza massima nodo-gateway nel nostro vigneto è circa 700~m, il margine è ampiamente sufficiente. Un singolo gateway posizionato in quota coprirebbe l'intero appezzamento; un secondo gateway è comunque previsto per ridondanza e per migliorare la ricezione nelle zone NLoS più sfavorevoli.
-
-\subsection{Verifica del Duty-Cycle ISM}
-
-Nella banda ISM a 868~MHz, la normativa europea impone che ogni dispositivo non trasmetta per più dell'1\,\% del tempo su un dato canale~\cite{etsi300220}. Il \textit{duty-cycle} è semplicemente il rapporto tra il tempo in cui il dispositivo trasmette e il tempo totale osservato.
-
-Per un singolo pacchetto LoRaWAN con 20~byte di \textit{payload}\footnote{Il \textit{payload} è la porzione utile del pacchetto, ovvero i dati effettivi (valori dei sensori) escluse le intestazioni di protocollo.}, la durata della trasmissione dipende dai parametri radio configurati. LoRa utilizza tre impostazioni principali:
-\begin{itemize}
-	\item \textbf{Spreading Factor (SF)}: determina la ``ridondanza'' del segnale. Valori più alti (da SF7 a SF12) aumentano la portata e la resistenza al rumore, ma allungano il tempo di trasmissione. Qui si usa SF9, un compromesso tra portata e velocità.
-	\item \textbf{Bandwidth (BW)}: la larghezza della banda di frequenza utilizzata. Il valore standard europeo è 125~kHz; una banda più larga consente trasmissioni più rapide ma con minor sensibilità.
-	\item \textbf{Coding Rate (CR)}: il livello di correzione d'errore aggiunto al pacchetto. Con CR~=~4/5 si aggiunge un 25\,\% di dati ridondanti per recuperare eventuali bit corrotti durante la trasmissione.
-\end{itemize}
-
-\noindent Il tempo di occupazione del canale (Time-on-Air) è inversamente proporzionale alla velocità di simbolo $R_s$, definita dalla larghezza di banda ($BW$) e dallo Spreading Factor ($SF$):
-\begin{equation}
-	R_s = \frac{BW}{2^{SF}}
-\end{equation}
-Il Duty Cycle complessivo per un singolo nodo viene calcolato come il rapporto tra il tempo di trasmissione cumulativo e il periodo di osservazione $T_{obs}$:
-\begin{equation}
-	DC_{nodo} = \frac{\sum T_{on\_air}}{T_{obs}} \cdot 100
-\end{equation}
-Secondo la normativa ETSI EN 300 220, deve risultare $DC_{aggregato} \leq 1\%$.\newline
-
-
-\noindent Con questa configurazione (SF9, BW~=~125~kHz, CR~=~4/5), il tempo che il trasmettitore occupa il canale radio per inviare un singolo pacchetto --- detto \textit{Time-on-Air} --- è circa 165~ms\footnote{Il valore è calcolabile con gli strumenti online forniti da Semtech (produttore dei chip LoRa) o con le formule della specifica SX1276; per semplicità si riporta direttamente il risultato.}. Ogni nodo trasmette una volta ogni 15~minuti, quindi 4 volte all'ora. Il duty-cycle di un singolo nodo è:
-
-\[
-    DC_{\text{nodo}} = \frac{4 \cdot 0{,}165 \text{\,s}}{3600 \text{\,s}} \approx 0{,}018\,\%
-\]
-
-\noindent Per verificare la conformità complessiva, si moltiplica per i 17 nodi Classe~A (12 ambientali + 4 suolo + 1 meteo):
-
-\[
-    DC_{\text{aggregato}} = 17 \cdot 0{,}018\,\% \approx 0{,}31\,\%
-\]
-
-\noindent Il valore è ampiamente inferiore al limite dell'1\,\%, lasciando margine per trasmissioni aggiuntive in modalità \textit{event-driven} e per eventuali ritrasmissioni.
-
-\subsection{Energy Budget}
-
-Per stimare l'autonomia di un nodo a batteria si calcola il consumo medio di corrente, tenendo conto che il nodo trascorre la quasi totalità del tempo in stato di riposo (\textit{deep sleep}). 
-
-Durante ogni ciclo di 15~minuti (900~secondi), il nodo attraversa tre stati distinti, ciascuno con un consumo di corrente molto diverso:
-\begin{enumerate}
-	\item \textbf{Deep sleep} --- il microcontrollore e il modulo radio sono completamente spenti; resta attivo solo un piccolo oscillatore interno che funge da sveglia. Il consumo è dell'ordine di pochi microampere (milionesimi di ampere), paragonabile alla corrente di autoscarica della batteria stessa. Questo stato occupa oltre il 99{,}9\,\% della durata del ciclo.
-	\item \textbf{Misura sensori} --- il microcontrollore si risveglia, alimenta i sensori collegati e ne legge i valori tramite i bus di comunicazione locale (I\textsuperscript{2}C o SDI-12). Il consumo sale a circa 10~milliampere, ma la durata è brevissima (circa 0{,}2~secondi).
-	\item \textbf{Trasmissione} --- il modulo radio si accende, invia il pacchetto LoRa e apre due brevi finestre di ricezione (come previsto dalla Classe~A). È la fase a maggior consumo ($\sim$45~mA), ma anch'essa dura una frazione di secondo.
-\end{enumerate}
-
-
-\noindent Il consumo medio di corrente $I_{avg}$ è calcolato come media pesata dei consumi nei diversi stati operativi ($i$) sul periodo totale del ciclo $T_{cycle}$:
-\begin{equation}
-	I_{avg} = \frac{1}{T_{cycle}} \sum_{i=1}^{n} (I_i \cdot t_i) = \frac{(I_{sleep} \cdot t_{sleep}) + (I_{sens} \cdot t_{sens}) + (I_{tx} \cdot t_{tx})}{T_{cycle}}
-\end{equation}
-L'autonomia teorica del dispositivo $T_{life}$ (espressa in ore) è data dal rapporto tra la capacità nominale della batteria $C_{batt}$ e la corrente media assorbita:
-\begin{equation}
-	T_{life} = \frac{C_{batt}}{I_{avg}}
-\end{equation}
-In condizioni reali, l'autonomia è ulteriormente limitata dal coefficiente di autoscarica annuale della batteria.
-
-\begin{table}[H]
-    \centering
-    \small
-    \begin{tabularx}{\textwidth}{|l|c|c|X|}
-        \hline
-        \textbf{Stato} & \textbf{Corrente} & \textbf{Durata} & \textbf{Note} \\
-        \hline
-        \textit{Deep sleep} & $\sim$5\,\textmu A & $\sim$899\,s & MCU e radio spenti; solo orologio interno attivo \\
-        \hline
-        Misura sensori & $\sim$10\,mA & $\sim$0{,}2\,s & Attivazione sensori, lettura I\textsuperscript{2}C/SDI-12 \\
-        \hline
-        Trasmissione TX & $\sim$45\,mA & $\sim$0{,}2\,s & Invio pacchetto LoRa + finestre RX (Classe A) \\
-        \hline
-    \end{tabularx}
-    \caption{Profilo di consumo di un nodo sensore Classe~A.}
-    \label{tab:energy_profile}
-\end{table}
-
-\noindent Il consumo medio si calcola come \textbf{media ponderata}: per ogni stato si moltiplica la corrente per il tempo in cui viene mantenuto, si sommano i contributi e si divide per la durata totale del ciclo (900~s = 15~min). Poiché il tempo di \textit{sleep} è enormemente maggiore degli altri, domina il risultato:
-
-\[
-    I_{\text{medio}} = \frac{(5\,\text{\textmu A} \times 899\,\text{s}) \;+\; (10\,000\,\text{\textmu A} \times 0{,}2\,\text{s}) \;+\; (45\,000\,\text{\textmu A} \times 0{,}2\,\text{s})}{900\,\text{s}} \approx 17\,\text{\textmu A}
-\]
-
-\noindent Per ottenere l'autonomia basta dividere la capacità della batteria per il consumo medio. Una batteria LiSOCl\textsubscript{2} formato~D (ad~es. Saft LS33600) ha una capacità di 19~Ah, ovvero 19\,000\,000\,\textmu Ah:
-
-\[
-    T_{\text{autonomia}} = \frac{19\,000\,000\,\text{\textmu Ah}}{17\,\text{\textmu A}} \approx 1{,}1 \times 10^6 \text{\,ore} \approx 127~\text{anni}
-\]
-
-\noindent Il valore è teorico e volutamente sovrastimato: nella pratica l'autoscarica interna della batteria (1--2\,\% annuo) e il degrado chimico limitano la durata effettiva a circa \textbf{8--10~anni}, comunque ben oltre il requisito minimo di 3--5~anni. L'aggiunta opzionale di un pannello solare da 1~W renderebbe il sistema virtualmente indipendente dalla sostituzione delle batterie.
-
-\subsection{Latenza dell'Allerta Gelate}
-
-La catena temporale dall'evento fisico alla notifica all'operatore è composta da:
-
-\begin{table}[H]
-    \centering
-    \small
-    \begin{tabularx}{\textwidth}{|l|c|X|}
-        \hline
-        \textbf{Fase} & \textbf{Tempo} & \textbf{Note} \\
-        \hline
-        Campionamento & $\leq$5~min & Intervallo massimo tra due misure (ridotto a 1~min in modalità allerta) \\
-        \hline
-        Trasmissione LoRa & $\sim$165~ms & Time-on-Air del pacchetto \\
-        \hline
-        Decodifica gateway & $<$50~ms & Elaborazione \textit{hardware} del gateway \\
-        \hline
-        Elaborazione fog & $<$100~ms & Confronto con soglia, generazione evento \\
-        \hline
-        Notifica & $<$2~s & SMS o notifica push via 4G \\
-        \hline
-        \textbf{Totale \textit{worst-case}} & $\sim$\textbf{5~min} & Dominato dall'intervallo di campionamento \\
-        \hline
-    \end{tabularx}
-    \caption{Stima della latenza \textit{end-to-end} per l'allerta gelate.}
-    \label{tab:latenza_gelate}
-\end{table}
-
-\noindent In modalità \textit{event-driven} (campionamento ogni 1~minuto, attivata quando la temperatura scende sotto i 3\,°C), la latenza complessiva si riduce a circa \textbf{1~minuto}, ben entro il requisito di 5~minuti.
-
-\subsection{Analisi Critica sulla Risoluzione Spaziale del Sistema}
-
-Il dimensionamento proposto nel Capitolo 5.4.1 rappresenta un compromesso ingegneristico volto a bilanciare costi operativi e complessità di rete. Tuttavia, da un punto di vista agronomico e di gestione della precisione, la suddivisione di un vigneto di 15 ettari in sole 4 zone di gestione (circa $3,75\text{ ha/nodo}$) presenta limiti strutturali che potrebbero compromettere l'efficacia del sistema.
-
-\subsubsection{Limiti della bassa risoluzione spaziale}
-In un territorio orograficamente complesso come quello irpino, la variabilità pedologica e microclimatica può manifestarsi su scala molto ridotta. L'adozione di sole 4 aree comporta:
-\begin{itemize}
-	\item \textbf{Errore di rappresentatività:} Un singolo sensore di umidità non può catturare le differenze di drenaggio tra zone a diversa pendenza o composizione chimico-fisica.
-	\item \textbf{Vincolo Idraulico:} L'attuazione basata su macro-settori impedisce interventi mirati, portando inevitabilmente a fenomeni di \textit{over-irrigation} in zone a bassa evaporazione e \textit{under-irrigation} in zone più esposte.
-\end{itemize}
-
-\subsubsection{Modellazione di un sistema ad alta risoluzione}
-Per riflettere la reale eterogeneità del terreno, si propone una configurazione a \textbf{15 aree indipendenti} ($1\text{ nodo/ha}$). In questa configurazione, la densità dei nodi $N$ deve essere inversamente proporzionale alla varianza delle caratteristiche idriche del suolo $\sigma_{soil}^2$:
-\begin{equation}
-	N_{zones} \propto \frac{1}{\sigma_{soil}^2}
-\end{equation}
-
-\noindent L'aumento dei nodi richiede una verifica rigorosa del Duty Cycle complessivo ($DC_{total}$), che deve ora includere non solo i messaggi di uplink dei sensori, ma anche i pacchetti di comando e i relativi \textit{acknowledgment} (ACK) degli attuatori in Classe C:
-\begin{equation}
-	DC_{total} = \sum_{i=1}^{n_{sens}} DC_{uplink,i} + \sum_{j=1}^{m_{act}} (DC_{cmd,j} + DC_{ack,j})
-\end{equation}
-
-\subsubsection{Vantaggi prestazionali attesi}
-L'evoluzione verso un sistema a 15 aree permetterebbe di ottenere:
-\begin{itemize}
-	\item \textbf{Ottimizzazione del ROI:} Sebbene il costo dell'hardware aumenti, il risparmio idrico e il miglioramento della qualità dell'uva (evitando stress idrici localizzati) garantiscono un ritorno sull'investimento superiore nel lungo periodo.
-	\item \textbf{Fornitura di mappe di prescrizione:} Una risoluzione di $1\text{ nodo/ha}$ consente la generazione di mappe di vigore e di prescrizione basate su dati reali, fondamentali per le certificazioni di qualità DOCG.
-	\item \textbf{Ridondanza statistica:} La maggiore densità di dati permette l'uso di tecniche di interpolazione spaziale per compensare eventuali guasti dei singoli nodi, aumentando l'affidabilità complessiva dell'architettura.
-\end{itemize}
+Lo strumento è stato utilizzato per verificare la correttezza sintattica del codice Latex{} e uniformare la struttura delle sezioni.
 
