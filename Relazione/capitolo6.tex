@@ -217,8 +217,21 @@ Il numero di nodi è determinato dalla necessità di catturare la variabilità m
 \subsection{Copertura Radio e Link Budget}
 
 Per verificare che il segnale LoRa raggiunga il gateway da ogni punto del vigneto, si calcola il \textit{link budget}, ovvero il bilancio tra la potenza emessa dal trasmettitore e la sensibilità minima del ricevitore. Il link budget indica ``quanti dB di attenuazione'' il collegamento radio può tollerare prima di perdere il segnale\footnote{Il decibel (dB) è un'unità logaritmica usata per esprimere rapporti di potenza. Ogni 10~dB in più corrispondono a una potenza 10 volte maggiore; ogni 3~dB in più corrispondono circa al doppio della potenza.}.
+La potenza ricevuta dal gateway può essere modellata secondo l'equazione del bilancio di collegamento:
+$$P_{rx} = P_{tx} + G_{tx} + G_{rx} - L_{total}$$
+Dove:
+\begin{itemize}
+	\item $P_{tx}$ è la potenza del trasmettitore ($14\text{ dBm}$);
+	\item $G_{tx}$ e $G_{rx}$ sono i guadagni delle antenne;
+	\item $L_{total}$ rappresenta l'attenuazione massima ammissibile (Path Loss).
+\end{itemize}
+Affinché la comunicazione sia affidabile, deve essere garantita la condizione:
+\begin{equation}
+	P_{rx} \geq S
+\end{equation}
+\noindent dove $S$ è la sensibilità del ricevitore ($-137\text{ dBm}$).\newline
 
-I parametri tipici di un collegamento LoRaWAN a 868~MHz sono:
+\noindent I parametri tipici di un collegamento LoRaWAN a 868~MHz sono:
 \begin{itemize}
     \item \textbf{Potenza di trasmissione:} +14~dBm (il massimo consentito dalla normativa ISM europea);
     \item \textbf{Guadagno antenna gateway:} +6~dBi (antenna omnidirezionale in quota);
@@ -244,16 +257,27 @@ Per un singolo pacchetto LoRaWAN con 20~byte di \textit{payload}\footnote{Il \te
 	\item \textbf{Coding Rate (CR)}: il livello di correzione d'errore aggiunto al pacchetto. Con CR~=~4/5 si aggiunge un 25\,\% di dati ridondanti per recuperare eventuali bit corrotti durante la trasmissione.
 \end{itemize}
 
+\noindent Il tempo di occupazione del canale (Time-on-Air) è inversamente proporzionale alla velocità di simbolo $R_s$, definita dalla larghezza di banda ($BW$) e dallo Spreading Factor ($SF$):
+\begin{equation}
+	R_s = \frac{BW}{2^{SF}}
+\end{equation}
+Il Duty Cycle complessivo per un singolo nodo viene calcolato come il rapporto tra il tempo di trasmissione cumulativo e il periodo di osservazione $T_{obs}$:
+\begin{equation}
+	DC_{nodo} = \frac{\sum T_{on\_air}}{T_{obs}} \cdot 100
+\end{equation}
+Secondo la normativa ETSI EN 300 220, deve risultare $DC_{aggregato} \leq 1\%$.\newline
+
+
 \noindent Con questa configurazione (SF9, BW~=~125~kHz, CR~=~4/5), il tempo che il trasmettitore occupa il canale radio per inviare un singolo pacchetto --- detto \textit{Time-on-Air} --- è circa 165~ms\footnote{Il valore è calcolabile con gli strumenti online forniti da Semtech (produttore dei chip LoRa) o con le formule della specifica SX1276; per semplicità si riporta direttamente il risultato.}. Ogni nodo trasmette una volta ogni 15~minuti, quindi 4 volte all'ora. Il duty-cycle di un singolo nodo è:
 
 \[
-    DC_{\text{nodo}} = \frac{4 \times 0{,}165 \text{\,s}}{3600 \text{\,s}} \approx 0{,}018\,\%
+    DC_{\text{nodo}} = \frac{4 \cdot 0{,}165 \text{\,s}}{3600 \text{\,s}} \approx 0{,}018\,\%
 \]
 
 \noindent Per verificare la conformità complessiva, si moltiplica per i 17 nodi Classe~A (12 ambientali + 4 suolo + 1 meteo):
 
 \[
-    DC_{\text{aggregato}} = 17 \times 0{,}018\,\% \approx 0{,}31\,\%
+    DC_{\text{aggregato}} = 17 \cdot 0{,}018\,\% \approx 0{,}31\,\%
 \]
 
 \noindent Il valore è ampiamente inferiore al limite dell'1\,\%, lasciando margine per trasmissioni aggiuntive in modalità \textit{event-driven} e per eventuali ritrasmissioni.
@@ -269,7 +293,16 @@ Durante ogni ciclo di 15~minuti (900~secondi), il nodo attraversa tre stati dist
 	\item \textbf{Trasmissione} --- il modulo radio si accende, invia il pacchetto LoRa e apre due brevi finestre di ricezione (come previsto dalla Classe~A). È la fase a maggior consumo ($\sim$45~mA), ma anch'essa dura una frazione di secondo.
 \end{enumerate}
 
-\noindent La Tabella~\ref{tab:energy_profile} riassume questi tre stati.
+
+\noindent Il consumo medio di corrente $I_{avg}$ è calcolato come media pesata dei consumi nei diversi stati operativi ($i$) sul periodo totale del ciclo $T_{cycle}$:
+\begin{equation}
+	I_{avg} = \frac{1}{T_{cycle}} \sum_{i=1}^{n} (I_i \cdot t_i) = \frac{(I_{sleep} \cdot t_{sleep}) + (I_{sens} \cdot t_{sens}) + (I_{tx} \cdot t_{tx})}{T_{cycle}}
+\end{equation}
+L'autonomia teorica del dispositivo $T_{life}$ (espressa in ore) è data dal rapporto tra la capacità nominale della batteria $C_{batt}$ e la corrente media assorbita:
+\begin{equation}
+	T_{life} = \frac{C_{batt}}{I_{avg}}
+\end{equation}
+In condizioni reali, l'autonomia è ulteriormente limitata dal coefficiente di autoscarica annuale della batteria.
 
 \begin{table}[H]
     \centering
@@ -332,4 +365,34 @@ La catena temporale dall'evento fisico alla notifica all'operatore è composta d
 \end{table}
 
 \noindent In modalità \textit{event-driven} (campionamento ogni 1~minuto, attivata quando la temperatura scende sotto i 3\,°C), la latenza complessiva si riduce a circa \textbf{1~minuto}, ben entro il requisito di 5~minuti.
+
+\subsection{Analisi Critica sulla Risoluzione Spaziale del Sistema}
+
+Il dimensionamento proposto nel Capitolo 5.4.1 rappresenta un compromesso ingegneristico volto a bilanciare costi operativi e complessità di rete. Tuttavia, da un punto di vista agronomico e di gestione della precisione, la suddivisione di un vigneto di 15 ettari in sole 4 zone di gestione (circa $3,75\text{ ha/nodo}$) presenta limiti strutturali che potrebbero compromettere l'efficacia del sistema.
+
+\subsubsection{Limiti della bassa risoluzione spaziale}
+In un territorio orograficamente complesso come quello irpino, la variabilità pedologica e microclimatica può manifestarsi su scala molto ridotta. L'adozione di sole 4 aree comporta:
+\begin{itemize}
+	\item \textbf{Errore di rappresentatività:} Un singolo sensore di umidità non può catturare le differenze di drenaggio tra zone a diversa pendenza o composizione chimico-fisica.
+	\item \textbf{Vincolo Idraulico:} L'attuazione basata su macro-settori impedisce interventi mirati, portando inevitabilmente a fenomeni di \textit{over-irrigation} in zone a bassa evaporazione e \textit{under-irrigation} in zone più esposte.
+\end{itemize}
+
+\subsubsection{Modellazione di un sistema ad alta risoluzione}
+Per riflettere la reale eterogeneità del terreno, si propone una configurazione a \textbf{15 aree indipendenti} ($1\text{ nodo/ha}$). In questa configurazione, la densità dei nodi $N$ deve essere inversamente proporzionale alla varianza delle caratteristiche idriche del suolo $\sigma_{soil}^2$:
+\begin{equation}
+	N_{zones} \propto \frac{1}{\sigma_{soil}^2}
+\end{equation}
+
+\noindent L'aumento dei nodi richiede una verifica rigorosa del Duty Cycle complessivo ($DC_{total}$), che deve ora includere non solo i messaggi di uplink dei sensori, ma anche i pacchetti di comando e i relativi \textit{acknowledgment} (ACK) degli attuatori in Classe C:
+\begin{equation}
+	DC_{total} = \sum_{i=1}^{n_{sens}} DC_{uplink,i} + \sum_{j=1}^{m_{act}} (DC_{cmd,j} + DC_{ack,j})
+\end{equation}
+
+\subsubsection{Vantaggi prestazionali attesi}
+L'evoluzione verso un sistema a 15 aree permetterebbe di ottenere:
+\begin{itemize}
+	\item \textbf{Ottimizzazione del ROI:} Sebbene il costo dell'hardware aumenti, il risparmio idrico e il miglioramento della qualità dell'uva (evitando stress idrici localizzati) garantiscono un ritorno sull'investimento superiore nel lungo periodo.
+	\item \textbf{Fornitura di mappe di prescrizione:} Una risoluzione di $1\text{ nodo/ha}$ consente la generazione di mappe di vigore e di prescrizione basate su dati reali, fondamentali per le certificazioni di qualità DOCG.
+	\item \textbf{Ridondanza statistica:} La maggiore densità di dati permette l'uso di tecniche di interpolazione spaziale per compensare eventuali guasti dei singoli nodi, aumentando l'affidabilità complessiva dell'architettura.
+\end{itemize}
 
