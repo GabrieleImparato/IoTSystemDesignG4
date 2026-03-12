@@ -21,7 +21,7 @@ Il sistema IoT che si intende progettare persegue quattro obiettivi operativi pr
 
 	\item \textbf{Monitoraggio dello stress idrico}: la misura dell'umidità del suolo a diverse profondità consente di valutare la disponibilità idrica nella zona radicale e di individuare condizioni di stress, particolarmente critiche nelle fasi di maturazione.
 
-	\item \textbf{Allerta gelate primaverili}: nelle zone collinari irpine, gelate tardive tra marzo e aprile possono danneggiare gravemente i germogli in fase di sviluppo. Un sistema di allarme basato sul rilevamento in tempo quasi reale di temperature prossime a 0\,°C consente di attivare contromisure tempestive (ad esempio ventilatori antigelo o bruciatori).
+	\item \textbf{Allerta gelate primaverili}: nelle zone collinari irpine, gelate tardive tra marzo e aprile possono danneggiare gravemente i germogli in fase di sviluppo. Un sistema di allarme basato sul rilevamento in tempo quasi reale di temperature prossime a 0\,°C consente di attivare contromisure tempestive (ad esempio ventilatori antigelo\footnote{I ventilatori antigelo (\textit{wind machines}) sono torri alte circa 10~metri utilizzate in pieno campo per contrastare le gelate radiative. Durante le notti serene e calme si forma un'\textit{inversione termica}: l'aria fredda, più densa, ristagna al livello del suolo, mentre a 10--15~m di quota la temperatura è superiore di 2--4\,°C. I ventilatori rimescolano gli strati d'aria, portando quella più calda a contatto con i germogli e innalzando la temperatura quel tanto sufficiente a evitare il danno da gelo.} o bruciatori).
 
 	\item \textbf{Irrigazione di soccorso}: sebbene la viticoltura DOCG Taurasi non preveda irrigazione sistematica, in annate particolarmente siccitose è consentita l'irrigazione di soccorso. Il sistema deve poter comandare l'apertura di elettrovalvole in settori specifici del vigneto, sulla base dei dati di umidità del suolo.
 \end{itemize}
@@ -43,7 +43,7 @@ Oltre ai vincoli tecnici propri di qualsiasi sistema IoT agricolo, il caso di st
 
 L'analisi che segue mappa i sette punti critici individuati nel Capitolo~4 sul caso specifico del vigneto irpino, evidenziando come ciascun vincolo si declini nel contesto operativo reale.
 
-\paragraph{Energia.} I nodi sensore saranno installati in pieno campo, privi di accesso alla rete elettrica. L'alimentazione sarà interamente a batteria, eventualmente integrata da \textit{energy harvesting} fotovoltaico. Il vincolo è aggravato dal clima irpino: in inverno le giornate corte e la copertura nuvolosa limitano la ricarica solare, mentre il monitoraggio per l'allerta gelate è necessario proprio nei mesi a minor irraggiamento (marzo--aprile). Il \textit{power budget} dovrà quindi garantire il funzionamento autonomo anche senza ricarica solare prolungata, adottando un profilo di \textit{deep sleep} interrotto da brevi cicli di misura e trasmissione, con commutazione a modalità \textit{event-driven} in prossimità delle soglie di gelata.
+\paragraph{Energia.} I nodi sensore saranno installati in pieno campo, privi di accesso alla rete elettrica. L'alimentazione sarà interamente a batteria primaria non ricaricabile, con chimica ad alta densità energetica e bassa autoscarica. Il \textit{power budget} dovrà garantire un'autonomia pluriennale adottando un profilo di \textit{deep sleep} interrotto da brevi cicli di misura e trasmissione, con commutazione a modalità \textit{event-driven} in prossimità delle soglie di gelata.
 
 \paragraph{Connettività e latenza.} I requisiti di latenza sono eterogenei: il monitoraggio ambientale e fitosanitario tollera ritardi di 15--30~minuti, l'umidità del suolo fino a 30--60~minuti, mentre l'allerta gelate richiede una latenza \textit{end-to-end} inferiore a 5~minuti. Il comando degli attuatori non ha vincoli di tempo reale stretto ma necessita di conferma di ricezione. Il traffico è estremamente contenuto (poche decine di byte per pacchetto); la criticità risiede nella copertura radio in ambiente collinare con vegetazione e dislivelli, non nella capacità del canale.
 
@@ -55,7 +55,7 @@ L'analisi che segue mappa i sette punti critici individuati nel Capitolo~4 sul c
 
 \paragraph{Cloud vs. fog.} La connettività Internet dell'area (4G con segnale variabile, assenza di fibra ottica) impone che le funzionalità critiche --- allerta gelate, comando irrigazione, \textit{buffering} dei dati --- siano garantite localmente da un nodo fog, indipendentemente dalla raggiungibilità del cloud. Al cloud sono delegabili l'archiviazione storica, la \textit{dashboard} di visualizzazione e l'integrazione con servizi esterni (previsioni meteo, piattaforme consortili).
 
-\paragraph{Manutenibilità.} L'azienda non dispone di personale tecnico specializzato. L'autonomia delle batterie dovrà essere di almeno 3--5~anni, oppure garantita indefinitamente dalla ricarica solare, per evitare sostituzioni frequenti su 15~ettari. L'aggiornamento OTA\footnote{\textit{Over The Air} (OTA): procedura di aggiornamento del firmware di un dispositivo eseguita da remoto tramite la rete wireless, senza necessità di accesso fisico al nodo.} del firmware è desiderabile ma non indispensabile alla scala attuale. Il sistema dovrà includere un monitoraggio basilare dello stato dei dispositivi (livello batteria, RSSI\footnote{\textit{Received Signal Strength Indicator} (RSSI): misura della potenza del segnale radio ricevuto, espressa in dBm. Valori più elevati (meno negativi) indicano un collegamento più robusto.}, SNR\footnote{\textit{Signal-to-Noise Ratio} (SNR): rapporto tra la potenza del segnale utile e quella del rumore di fondo, espresso in dB. Un SNR elevato indica una comunicazione più affidabile e meno soggetta a errori di decodifica.}, regolarità delle trasmissioni) e gli involucri dovranno resistere a UV, pioggia e sollecitazioni meccaniche (IP65, fissaggio stabile).
+\paragraph{Manutenibilità.} L'azienda non dispone di personale tecnico specializzato. L'autonomia delle batterie dovrà essere di almeno 3--5~anni per evitare sostituzioni frequenti su 15~ettari. L'aggiornamento OTA\footnote{\textit{Over The Air} (OTA): procedura di aggiornamento del firmware di un dispositivo eseguita da remoto tramite la rete wireless, senza necessità di accesso fisico al nodo.} del firmware è desiderabile ma non indispensabile alla scala attuale. Il sistema dovrà includere un monitoraggio basilare dello stato dei dispositivi (livello batteria, RSSI\footnote{\textit{Received Signal Strength Indicator} (RSSI): misura della potenza del segnale radio ricevuto, espressa in dBm. Valori più elevati (meno negativi) indicano un collegamento più robusto.}, SNR\footnote{\textit{Signal-to-Noise Ratio} (SNR): rapporto tra la potenza del segnale utile e quella del rumore di fondo, espresso in dB. Un SNR elevato indica una comunicazione più affidabile e meno soggetta a errori di decodifica.}, regolarità delle trasmissioni) e gli involucri dovranno resistere a UV, pioggia e sollecitazioni meccaniche (IP65, fissaggio stabile).
 
 \subsection{Sintesi dei Vincoli e delle Scelte Adottate}
 
@@ -68,7 +68,7 @@ La Tabella~\ref{tab:vincoli_vigneto} riassume la mappatura dei punti critici gen
 		\hline
 		\textbf{Punto Critico} & \textbf{Declinazione nel Caso di Studio} & \textbf{Strategia Adottata} \\
 		\hline
-		Energia vs. campionamento & Nodi a batteria senza rete elettrica; inverni con scarso irraggiamento; monitoraggio necessario tutto l'anno & Batteria LiSOCl\textsubscript{2} ad alta capacità + pannello solare ausiliario; \textit{deep sleep} con \textit{duty cycling} aggressivo; modalità \textit{event-driven} per soglie critiche \\
+		Energia vs. campionamento & Nodi a batteria senza rete elettrica; inverni con scarso irraggiamento; monitoraggio necessario tutto l'anno & Batteria primaria LiSOCl\textsubscript{2} ad alta capacità (non ricaricabile); \textit{deep sleep} con \textit{duty cycling} aggressivo; modalità \textit{event-driven} per soglie critiche \\
 		\hline
 		Connettività e latenza & Requisiti eterogenei: 15--30~min per monitoraggio, $<$5~min per allerta gelate; traffico contenuto (decine di byte) & Trasmissioni periodiche ogni 15~min; invio immediato al superamento di soglie; conferma ricezione per comandi attuatori \\
 		\hline
@@ -103,7 +103,7 @@ L'architettura proposta è organizzata su tre livelli funzionali, coerentemente 
 \paragraph{Componenti.} Il livello comprende tre tipologie di nodi:
 
 \begin{itemize}
-	\item \textbf{Nodi ambientali} ($\sim$12--15 unità): distribuiti nei filari, ciascuno equipaggiato con sensori di temperatura e umidità dell'aria, sensore di bagnatura fogliare e modulo radio LoRa. Alimentazione a batteria con pannello solare ausiliario.
+	\item \textbf{Nodi ambientali} ($\sim$12--15 unità): distribuiti nei filari, ciascuno equipaggiato con sensori di temperatura e umidità dell'aria, sensore di bagnatura fogliare e modulo radio LoRa. Alimentazione a batteria primaria LiSOCl\textsubscript{2}.
 
 	\item \textbf{Nodi di umidità del suolo} ($\sim$4 unità): installati nella zona radicale a diverse profondità, dotati di sonde resistive o capacitive per la misura del contenuto idrico. Alimentazione a batteria.
 
@@ -134,8 +134,8 @@ L'architettura proposta è organizzata su tre livelli funzionali, coerentemente 
 
 \begin{itemize}
 	\item \textbf{MQTT}\footnote{MQTT (\textit{Message Queuing Telemetry Transport}) è un protocollo di messaggistica \textit{publish-subscribe} progettato per connessioni a banda limitata e dispositivi con risorse ridotte. Il broker MQTT funge da intermediario: i dispositivi pubblicano messaggi su \textit{topic} e i sottoscrittori li ricevono in modo asincrono ed efficiente.}: protocollo \textit{publish-subscribe} leggero per il transito dei dati dal gateway al fog node (broker MQTT locale) e dal fog node al cloud (broker MQTT remoto). I nodi sensore pubblicano le misure su \textit{topic} organizzati per zona e tipologia; il fog node sottoscrive i \textit{topic} rilevanti per l'elaborazione locale.
-	\item \textbf{Ethernet / Wi-Fi}: connessione locale tra gateway e fog node.
-	\item \textbf{4G (LTE)}: connessione del fog node verso Internet per la sincronizzazione con il livello cloud, tramite router cellulare.
+	\item \textbf{Ethernet}: connessione locale tra gateway e fog node.
+	\item \textbf{Wi-Fi}: connessione del fog node verso Internet per la sincronizzazione con il livello cloud, tramite router cellulare.
 	\item \textbf{NTP}\footnote{NTP (\textit{Network Time Protocol}) è un protocollo per la sincronizzazione degli orologi dei dispositivi in rete con riferimenti temporali accurati. La coerenza temporale è essenziale per correlare correttamente le misure provenienti da nodi diversi e per la marcatura temporale degli eventi di allerta.}: sincronizzazione temporale del fog node e, indirettamente, dei \textit{timestamp} assegnati ai dati ricevuti.
 \end{itemize}
 
@@ -174,7 +174,7 @@ La Tabella~\ref{tab:architettura_livelli} riassume i tre livelli, i componenti p
 		\hline
 		1 -- Dispositivo & Nodi ambientali, nodi suolo, nodi attuatore & LoRaWAN (Classe A/C), I\textsuperscript{2}C, SDI-12 & Acquisizione dati, comando elettrovalvole \\
 		\hline
-		2 -- Fog & Gateway LoRaWAN, fog node & MQTT, Ethernet/Wi-Fi, 4G, NTP & Allerta gelate, comando irrigazione, buffering, sincronizzazione \\
+		2 -- Fog & Gateway LoRaWAN, fog node & MQTT, Ethernet, Wi-Fi, NTP & Allerta gelate, comando irrigazione, buffering, sincronizzazione \\
 		\hline
 		3 -- Cloud & Broker MQTT, DB time-series, dashboard, notifiche & MQTT/TLS, HTTPS/REST & Archiviazione storica, visualizzazione, notifiche remote \\
 		\hline
@@ -334,7 +334,7 @@ In condizioni reali, l'autonomia è ulteriormente limitata dal coefficiente di a
     T_{\text{autonomia}} = \frac{19\,000\,000\,\text{\textmu Ah}}{17\,\text{\textmu A}} \approx 1{,}1 \times 10^6 \text{\,ore} \approx 127~\text{anni}
 \]
 
-\noindent Il valore è teorico e volutamente sovrastimato: nella pratica l'autoscarica interna della batteria (1--2\,\% annuo) e il degrado chimico limitano la durata effettiva a circa \textbf{8--10~anni}, comunque ben oltre il requisito minimo di 3--5~anni. L'aggiunta opzionale di un pannello solare da 1~W renderebbe il sistema virtualmente indipendente dalla sostituzione delle batterie.
+\noindent Il valore è teorico e volutamente sovrastimato: nella pratica l'autoscarica interna della batteria (1--2\,\% annuo) e il degrado chimico limitano la durata effettiva a circa \textbf{8--10~anni}, comunque ben oltre il requisito minimo di 3--5~anni. La scelta di batterie primarie LiSOCl\textsubscript{2}, non ricaricabili ma con bassissima autoscarica, è coerente con un'installazione a minima manutenzione che non richiede circuiti di ricarica né pannelli solari.
 
 \subsection{Latenza dell'Allerta Gelate}
 
